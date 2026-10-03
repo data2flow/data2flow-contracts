@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://data2flow.java21.net/schemas/flow-node-type.v1.json",
+  "title": "FlowNodeType v1 (API-FLW-30 노드 카탈로그 항목, TC-FLW-031)",
+  "description": "flow-engine 노드 레지스트리가 내는 노드 종류 설명. 웹 팔레트와 설정 폼이 이것으로 만들어진다. 모든 노드의 출력에는 error 포트가 있다.",
+  "type": "object",
+  "required": [
+    "type",
+    "typeVersion",
+    "category",
+    "name",
+    "configSchema",
+    "inputs",
+    "outputs"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "pattern": "^[a-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*)+$"
+    },
+    "typeVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "category": {
+      "enum": [
+        "trigger",
+        "condition",
+        "transform",
+        "flow",
+        "action",
+        "sink",
+        "debug",
+        "enrich",
+        "ai"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "icon": {
+      "type": "string"
+    },
+    "configSchema": {
+      "type": "object"
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string"
+          },
+          "dynamic": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string"
+          },
+          "dynamic": {
+            "type": "boolean"
+          }
+        }
+      },
+      "contains": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "const": "error"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    "statePolicy": {
+      "type": "object"
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "defaults": {
+      "type": "object"
+    }
+  }
+}
