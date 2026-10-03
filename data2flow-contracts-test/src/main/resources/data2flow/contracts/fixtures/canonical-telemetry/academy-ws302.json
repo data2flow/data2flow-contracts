@@ -1,0 +1,64 @@
+{
+  "v": 1,
+  "messageId": "8f3e2c1a-5b6d-4e7f-8a9b-000000000006",
+  "organizationId": 1,
+  "sourceId": 3,
+  "externalId": "24e124743d012436",
+  "deviceId": 17,
+  "deviceStatus": "ACTIVE",
+  "modelId": "6",
+  "spaceId": 31,
+  "measuredAt": "2026-10-03T02:40:14.123Z",
+  "receivedAt": "2026-10-03T02:40:14.501Z",
+  "late": false,
+  "virtual": false,
+  "metrics": [
+    {
+      "key": "LAeq",
+      "value": 30.5,
+      "quality": 0,
+      "unit": "dB"
+    },
+    {
+      "key": "LAI",
+      "value": 42.0,
+      "quality": 0,
+      "unit": "dB"
+    },
+    {
+      "key": "LAImax",
+      "value": 42.0,
+      "quality": 0,
+      "unit": "dB"
+    },
+    {
+      "key": "battery",
+      "value": 55,
+      "quality": 0,
+      "unit": "%"
+    }
+  ],
+  "link": {
+    "rssi": -33,
+    "snr": 13.5,
+    "frameCounter": 23518,
+    "gateways": [
+      {
+        "eui": "24e124fffef79304",
+        "rssi": -33,
+        "snr": 13.5
+      }
+    ]
+  },
+  "meta": {
+    "tags": {
+      "location": "실습실",
+      "point": "강단"
+    },
+    "decoder": {
+      "key": "chirpstack-v4",
+      "version": "1"
+    }
+  },
+  "rawMessageId": 8812350
+}

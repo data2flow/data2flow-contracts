@@ -1,0 +1,57 @@
+{
+  "v": 1,
+  "messageId": "8f3e2c1a-5b6d-4e7f-8a9b-000000000002",
+  "organizationId": 1,
+  "sourceId": 3,
+  "externalId": "24e124785c389818",
+  "deviceId": 22,
+  "deviceStatus": "ACTIVE",
+  "modelId": "2",
+  "spaceId": 31,
+  "measuredAt": "2026-10-03T02:40:10.123Z",
+  "receivedAt": "2026-10-03T02:40:10.501Z",
+  "late": false,
+  "virtual": false,
+  "metrics": [
+    {
+      "key": "temperature",
+      "value": 22.8,
+      "quality": 0,
+      "unit": "℃"
+    },
+    {
+      "key": "humidity",
+      "value": 43.0,
+      "quality": 0,
+      "unit": "%"
+    },
+    {
+      "key": "battery",
+      "value": 98,
+      "quality": 0,
+      "unit": "%"
+    }
+  ],
+  "link": {
+    "rssi": -64,
+    "snr": 10.0,
+    "frameCounter": 5120,
+    "gateways": [
+      {
+        "eui": "24e124fffef79304",
+        "rssi": -64,
+        "snr": 10.0
+      }
+    ]
+  },
+  "meta": {
+    "tags": {
+      "location": "실습실"
+    },
+    "decoder": {
+      "key": "chirpstack-v4",
+      "version": "1"
+    }
+  },
+  "rawMessageId": 8812346
+}

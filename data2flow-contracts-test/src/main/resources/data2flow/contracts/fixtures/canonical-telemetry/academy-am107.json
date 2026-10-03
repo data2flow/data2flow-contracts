@@ -1,0 +1,85 @@
+{
+  "v": 1,
+  "messageId": "8f3e2c1a-5b6d-4e7f-8a9b-000000000005",
+  "organizationId": 1,
+  "sourceId": 3,
+  "externalId": "24e124128c067999",
+  "deviceId": 25,
+  "deviceStatus": "ACTIVE",
+  "modelId": "5",
+  "spaceId": 31,
+  "measuredAt": "2026-10-03T02:40:13.123Z",
+  "receivedAt": "2026-10-03T02:40:13.501Z",
+  "late": false,
+  "virtual": false,
+  "metrics": [
+    {
+      "key": "co2",
+      "value": 1150,
+      "quality": 0,
+      "unit": "ppm"
+    },
+    {
+      "key": "tvoc",
+      "value": 39,
+      "quality": 0
+    },
+    {
+      "key": "pressure",
+      "value": 1004,
+      "quality": 0,
+      "unit": "hPa"
+    },
+    {
+      "key": "illumination",
+      "value": 2,
+      "quality": 0,
+      "unit": "lux"
+    },
+    {
+      "key": "infrared",
+      "value": 0,
+      "quality": 0
+    },
+    {
+      "key": "activity",
+      "value": 18,
+      "quality": 0
+    },
+    {
+      "key": "temperature",
+      "value": 22.3,
+      "quality": 0,
+      "unit": "℃"
+    },
+    {
+      "key": "humidity",
+      "value": 44.5,
+      "quality": 0,
+      "unit": "%"
+    }
+  ],
+  "link": {
+    "rssi": -75,
+    "snr": 8.0,
+    "frameCounter": 77120,
+    "gateways": [
+      {
+        "eui": "24e124fffef79304",
+        "rssi": -75,
+        "snr": 8.0
+      }
+    ]
+  },
+  "meta": {
+    "tags": {
+      "location": "실습실",
+      "point": "후면 오른쪽"
+    },
+    "decoder": {
+      "key": "chirpstack-v4",
+      "version": "1"
+    }
+  },
+  "rawMessageId": 8812349
+}

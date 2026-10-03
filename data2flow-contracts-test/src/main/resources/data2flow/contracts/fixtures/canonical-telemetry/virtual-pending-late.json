@@ -1,0 +1,56 @@
+{
+  "v": 1,
+  "messageId": "8f3e2c1a-5b6d-4e7f-8a9b-0000000000a1",
+  "organizationId": 1,
+  "sourceId": 9,
+  "externalId": "sim-room-101-co2",
+  "deviceId": 901,
+  "deviceStatus": "PENDING",
+  "measuredAt": "2026-10-03T01:10:00Z",
+  "receivedAt": "2026-10-03T02:40:00Z",
+  "late": true,
+  "virtual": true,
+  "metrics": [
+    {
+      "key": "co2",
+      "value": 2400,
+      "quality": 1,
+      "unit": "ppm"
+    },
+    {
+      "key": "dew_point",
+      "value": 11.2,
+      "quality": 0,
+      "unit": "℃"
+    },
+    {
+      "key": "thi",
+      "value": 71.3,
+      "quality": 0,
+      "derived": true
+    },
+    {
+      "key": "humidity",
+      "value": 44.0,
+      "quality": 4,
+      "unit": "%"
+    }
+  ],
+  "meta": {
+    "decoder": {
+      "key": "script:42@v3",
+      "version": "3"
+    },
+    "scripts": [
+      {
+        "id": 42,
+        "version": 3
+      },
+      {
+        "id": 43,
+        "version": 1
+      }
+    ]
+  },
+  "rawMessageId": 9900001
+}

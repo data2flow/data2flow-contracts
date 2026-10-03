@@ -1,0 +1,64 @@
+{
+  "v": 1,
+  "messageId": "8f3e2c1a-5b6d-4e7f-8a9b-000000000004",
+  "organizationId": 1,
+  "sourceId": 3,
+  "externalId": "24e124725d081175",
+  "deviceId": 24,
+  "deviceStatus": "ACTIVE",
+  "modelId": "4",
+  "spaceId": 32,
+  "measuredAt": "2026-10-03T02:40:12.123Z",
+  "receivedAt": "2026-10-03T02:40:12.501Z",
+  "late": false,
+  "virtual": false,
+  "metrics": [
+    {
+      "key": "co2",
+      "value": 980,
+      "quality": 0,
+      "unit": "ppm"
+    },
+    {
+      "key": "temperature",
+      "value": 23.4,
+      "quality": 0,
+      "unit": "℃"
+    },
+    {
+      "key": "humidity",
+      "value": 41.0,
+      "quality": 0,
+      "unit": "%"
+    },
+    {
+      "key": "battery",
+      "value": 1,
+      "quality": 0,
+      "unit": "%"
+    }
+  ],
+  "link": {
+    "rssi": -98,
+    "snr": -1.5,
+    "frameCounter": 30551,
+    "gateways": [
+      {
+        "eui": "24e124fffef79304",
+        "rssi": -98,
+        "snr": -1.5
+      }
+    ]
+  },
+  "meta": {
+    "tags": {
+      "location": "사무실",
+      "point": "업무 공간 안쪽"
+    },
+    "decoder": {
+      "key": "chirpstack-v4",
+      "version": "1"
+    }
+  },
+  "rawMessageId": 8812348
+}

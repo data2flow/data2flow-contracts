@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "messageId": "5a0c1d2e-3f40-4152-8a6b-7c8d9e0f1a2c",
+  "organizationId": 1,
+  "sourceId": 3,
+  "sourceType": "WEBHOOK",
+  "topic": "/ingest/webhook/hvac-erp",
+  "payload": "MjMuNQ==",
+  "receivedAt": "2026-10-03T02:40:09.501Z",
+  "ingressInstance": "data2flow-ingress-1",
+  "dedupKey": "sha256b:0000000000000000000000000000000000000000000000000000000000000000",
+  "virtual": false
+}
