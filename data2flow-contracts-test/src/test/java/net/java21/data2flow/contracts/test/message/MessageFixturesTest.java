@@ -1,9 +1,16 @@
 package net.java21.data2flow.contracts.test.message;
 
+import net.java21.data2flow.contracts.command.CommandPriority;
+import net.java21.data2flow.contracts.command.SourceType;
+import net.java21.data2flow.contracts.message.ActionRequest;
 import net.java21.data2flow.contracts.message.CanonicalTelemetry;
+import net.java21.data2flow.contracts.message.DomainEvent;
+import net.java21.data2flow.contracts.message.EventType;
 import net.java21.data2flow.contracts.message.MessageCodec;
 import net.java21.data2flow.contracts.message.MessageSchemas;
 import net.java21.data2flow.contracts.message.RawEnvelope;
+import net.java21.data2flow.contracts.message.event.DeviceCommandAck;
+import net.java21.data2flow.contracts.message.event.EventPayload;
 import net.java21.data2flow.contracts.messaging.DedupKeys;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +33,52 @@ class MessageFixturesTest {
     private final MessageCodec codec = MessageCodec.create();
     static final List<String> TELEMETRY = MessageFixtures.CANONICAL_TELEMETRY;
     static final List<String> RAW = MessageFixtures.RAW_ENVELOPE;
+    static final List<String> ACTIONS = MessageFixtures.ACTION_REQUEST;
+    static final List<String> EVENTS = MessageFixtures.DOMAIN_EVENT;
+
+    @ParameterizedTest
+    @FieldSource("ACTIONS")
+    @DisplayName("ACT-02.01 TC-ACT-027 행동 요청 공유 픽스처가 action-request.v1.json을 통과하고 COMMAND 본문으로 손실 없이 읽힌다")
+    void actionRequestFixtures(String name) {
+        MessageSchemas.assertValid(MessageSchemas.ACTION_REQUEST, codec.mapper().readTree(MessageFixtures.actionRequestJson(name)));
+        ActionRequest request = MessageFixtures.actionRequest(name);
+        MessageSchemas.assertValid(request);
+        assertThat(codec.read(codec.write(request), ActionRequest.class)).isEqualTo(request);
+        assertThat(request.commandPayload().capability()).isNotBlank();
+        assertThat(request.priority()).isEqualTo(request.source().priority());
+    }
+
+    @Test
+    @DisplayName("FLW-05.01 TC-ACT-027 플로우 제어 노드 픽스처: 공간 관계 대상, AUTO, 결과 대기")
+    void flowCommandFixture() {
+        ActionRequest request = MessageFixtures.actionRequest("flow-command-heatwave");
+        assertThat(request.source().type()).isEqualTo(SourceType.FLOW);
+        assertThat(request.priority()).isEqualTo(CommandPriority.AUTO);
+        assertThat(request.routingKey()).isEqualTo("command");
+        assertThat(request.commandPayload().target().isDevice()).isFalse();
+        assertThat(request.commandPayload().args()).containsEntry("targetTemperature", 24);
+        assertThat(request.commandPayload().awaitResult()).isTrue();
+    }
+
+    @ParameterizedTest
+    @FieldSource("EVENTS")
+    @DisplayName("SIM-03.04 TC-SIM-036 M3 도메인 이벤트 픽스처가 domain-event.v1.json을 통과하고 다시 써도 같은 바이트다")
+    void domainEventFixtures(String name) {
+        byte[] json = MessageFixtures.domainEventJson(name);
+        MessageSchemas.assertValid(MessageSchemas.DOMAIN_EVENT, codec.mapper().readTree(json));
+        DomainEvent<? extends EventPayload> event = MessageFixtures.domainEvent(name);
+        assertThat(codec.mapper().readTree(codec.write(event))).isEqualTo(codec.mapper().readTree(json));
+    }
+
+    @Test
+    @DisplayName("ACT-03.02 BR-ACT-25 가상 장비 ack 픽스처는 device.command.ack + virtual=true")
+    void virtualAckFixture() {
+        DomainEvent<? extends EventPayload> event = MessageFixtures.domainEvent("device-command-ack-virtual");
+        assertThat(event.eventType()).isEqualTo(EventType.DEVICE_COMMAND_ACK);
+        DeviceCommandAck ack = (DeviceCommandAck) event.payload();
+        assertThat(ack.result()).isEqualTo(DeviceCommandAck.Result.ACKED);
+        assertThat(ack.virtual()).isTrue();
+    }
 
     @ParameterizedTest
     @FieldSource("TELEMETRY")

@@ -1,8 +1,11 @@
 package net.java21.data2flow.contracts.test.message;
 
+import net.java21.data2flow.contracts.message.ActionRequest;
 import net.java21.data2flow.contracts.message.CanonicalTelemetry;
+import net.java21.data2flow.contracts.message.DomainEvent;
 import net.java21.data2flow.contracts.message.MessageCodec;
 import net.java21.data2flow.contracts.message.RawEnvelope;
+import net.java21.data2flow.contracts.message.event.EventPayload;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +19,8 @@ import java.util.Map;
  *
  * <p>pipeline은 디코더 출력이 이 픽스처와 같은 모양인지, flow-engine·core-api(SSE)·analytics 소비자는 이 픽스처를 읽을 수 있는지
  * 계약 테스트에서 확인한다. 아카데미 실측 기기 6종(DEV-03.02: EM300-TH, EM320-TH, EM500-CO2, AM103, AM107, WS302)의 값을 담았다.
- * 파일은 {@code classpath:data2flow/contracts/fixtures/{canonical-telemetry|raw-envelope}/{이름}.json}에 있다.
+ * M3(가상 폐루프)의 행동 요청(TC-ACT-027: flow-engine 생산자와 action 소비자가 같은 픽스처)과 ACT·SIM 도메인 이벤트도 있다.
+ * 파일은 {@code classpath:data2flow/contracts/fixtures/{canonical-telemetry|raw-envelope|action-request|domain-event}/{이름}.json}에 있다.
  */
 public final class MessageFixtures {
 
@@ -35,6 +39,16 @@ public final class MessageFixtures {
     /** 원본 봉투: ChirpStack v4 업링크(WS302), Webhook 단일 값, 시뮬레이터 가상 메시지 */
     public static final List<String> RAW_ENVELOPE = List.of(
             "chirpstack-ws302-uplink", "webhook-single-value", "simulation-virtual");
+
+    /** 행동 요청: 플로우 "고온이면 냉방" 제어 노드(공간 관계 대상), 사용자 기기 명령(모르는 필드 포함) */
+    public static final List<String> ACTION_REQUEST = List.of("flow-command-heatwave", "user-command-device");
+
+    /**
+     * M3 도메인 이벤트: 가상 장비 ack·상태 보고(EVT-SIM-03 = EVT-ACT-06·07, 시뮬레이터가 실제로 내는 바이트 모양), 명령 상태(EVT-ACT-01),
+     * 실행 상태(EVT-SIM-01), 장애 라벨(EVT-SIM-02)
+     */
+    public static final List<String> DOMAIN_EVENT = List.of("device-command-ack-virtual", "device-state-reported-virtual",
+            "command-status-applied", "sim-run-started", "sim-fault-started");
 
     private static final MessageCodec CODEC = MessageCodec.create();
 
@@ -67,6 +81,22 @@ public final class MessageFixtures {
     /** ChirpStack v4 {@code application/.../event/up} 원본 JSON(research/01 §6 예시에 deduplicationId·nsTime을 채운 것) */
     public static byte[] chirpStackUplinkPayload() {
         return rawEnvelope("chirpstack-ws302-uplink").payload();
+    }
+
+    public static byte[] actionRequestJson(String name) {
+        return load("action-request/" + name + ".json");
+    }
+
+    public static ActionRequest actionRequest(String name) {
+        return CODEC.read(actionRequestJson(name), ActionRequest.class);
+    }
+
+    public static byte[] domainEventJson(String name) {
+        return load("domain-event/" + name + ".json");
+    }
+
+    public static DomainEvent<? extends EventPayload> domainEvent(String name) {
+        return CODEC.readEvent(domainEventJson(name));
     }
 
     private static byte[] load(String path) {

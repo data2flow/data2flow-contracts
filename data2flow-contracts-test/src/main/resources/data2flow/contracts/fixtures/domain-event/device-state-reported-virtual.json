@@ -1,0 +1,1 @@
+{"v":1,"messageId":"5d0c7c1a-9a51-4c43-bf0e-0d6f2d6c4a12","type":"device.state.reported","organizationId":1,"occurredAt":"2026-07-15T05:00:10Z","payload":{"deviceId":15,"version":8,"capabilities":{"Switch":{"on":true},"Thermostat":{"mode":"cool","targetTemperature":24.0,"currentTemperature":27.4}},"reportedAt":"2026-07-15T05:00:10Z","virtual":true}}

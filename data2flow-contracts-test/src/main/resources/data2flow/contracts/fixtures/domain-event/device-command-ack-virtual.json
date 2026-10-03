@@ -1,0 +1,1 @@
+{"v":1,"messageId":"5d0c7c1a-9a51-4c43-bf0e-0d6f2d6c4a11","type":"device.command.ack","organizationId":1,"occurredAt":"2026-07-15T05:00:10Z","payload":{"commandId":"8f1c2d3e-0000-4000-8000-000000000001","deviceId":15,"result":"ACKED","at":"2026-07-15T05:00:10Z","virtual":true}}

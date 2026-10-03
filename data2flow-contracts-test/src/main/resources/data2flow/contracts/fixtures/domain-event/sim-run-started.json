@@ -1,0 +1,1 @@
+{"v":1,"messageId":"5d0c7c1a-9a51-4c43-bf0e-0d6f2d6c4a14","type":"sim.run.started","organizationId":1,"occurredAt":"2026-10-03T01:00:00Z","payload":{"organizationId":1,"runId":42,"scenarioId":3,"status":"RUNNING","simClock":"2026-07-15T04:00:00Z","accelerationEffective":60,"at":"2026-10-03T01:00:00Z"}}

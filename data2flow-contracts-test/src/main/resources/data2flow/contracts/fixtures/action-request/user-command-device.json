@@ -1,0 +1,19 @@
+{
+  "v": 1,
+  "messageId": "0b8f6a52-3c1d-4e2f-9a7b-5c6d7e8f9a02",
+  "idempotencyKey": "ui-7d2c:click-0001",
+  "kind": "COMMAND",
+  "organizationId": 1,
+  "createdAt": "2026-10-03T01:15:00Z",
+  "source": {"type": "USER", "userId": 7},
+  "priority": "MANUAL",
+  "payload": {
+    "target": {"deviceId": 15},
+    "capability": "Switch",
+    "command": "set",
+    "args": {"on": false},
+    "awaitResult": false,
+    "futureField": "소비자는 무시한다"
+  },
+  "futureTopLevel": 1
+}

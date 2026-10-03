@@ -1,5 +1,9 @@
 package net.java21.data2flow.contracts.message;
 
+import net.java21.data2flow.contracts.capability.StateChange;
+import net.java21.data2flow.contracts.command.CommandPriority;
+import net.java21.data2flow.contracts.command.CommandSource;
+import net.java21.data2flow.contracts.command.CommandStatus;
 import net.java21.data2flow.contracts.connector.AckMode;
 import net.java21.data2flow.contracts.connector.AuthMethod;
 import net.java21.data2flow.contracts.connector.ConnectionErrorKind;
@@ -10,16 +14,25 @@ import net.java21.data2flow.contracts.connector.PayloadFormat;
 import net.java21.data2flow.contracts.connector.ScalingMode;
 import net.java21.data2flow.contracts.message.event.AggregatesRecomputed;
 import net.java21.data2flow.contracts.message.event.ClockSkewSuspected;
+import net.java21.data2flow.contracts.message.event.CommandStatusChanged;
 import net.java21.data2flow.contracts.message.event.ConnectorCatalogReported;
 import net.java21.data2flow.contracts.message.event.DeviceChanged;
+import net.java21.data2flow.contracts.message.event.DeviceCommandAck;
 import net.java21.data2flow.contracts.message.event.DeviceConnectivityChanged;
 import net.java21.data2flow.contracts.message.event.DevicePendingCreated;
+import net.java21.data2flow.contracts.message.event.DeviceStateChanged;
+import net.java21.data2flow.contracts.message.event.DeviceStateReported;
 import net.java21.data2flow.contracts.message.event.EventPayload;
+import net.java21.data2flow.contracts.message.event.FlowApplyReported;
+import net.java21.data2flow.contracts.message.event.FlowStateChanged;
 import net.java21.data2flow.contracts.message.event.GroupMembershipChanged;
 import net.java21.data2flow.contracts.message.event.IngestAlert;
 import net.java21.data2flow.contracts.message.event.IngestGapDetected;
 import net.java21.data2flow.contracts.message.event.MetricUnverifiedRegistered;
 import net.java21.data2flow.contracts.message.event.PartitionWarning;
+import net.java21.data2flow.contracts.message.event.SimDataPurged;
+import net.java21.data2flow.contracts.message.event.SimFaultLabel;
+import net.java21.data2flow.contracts.message.event.SimRunChanged;
 import net.java21.data2flow.contracts.message.event.SourceConnectionChanged;
 import net.java21.data2flow.contracts.message.event.SourceDataActivity;
 import net.java21.data2flow.contracts.message.event.SourceRuntimeReported;
@@ -39,6 +52,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,11 +99,40 @@ class DomainEventContractTest {
                 List.of(new AggregatesRecomputed.Item(17, "co2", T.minusSeconds(3600), T))));
         SAMPLES.put(EventType.PARTITION_WARNING, new PartitionWarning("data2flow_pipeline.telemetry",
                 PartitionWarning.DEFAULT_PARTITION_ROWS, "12 rows"));
+
+        // M3 가상 폐루프
+        for (CommandStatus status : CommandStatus.values()) {
+            if (status != CommandStatus.UNKNOWN) {
+                SAMPLES.put(EventType.commandStatus(status), new CommandStatusChanged(UUID.fromString(
+                        "8f1c2d3e-0000-4000-8000-000000000001"), "6a0f1f4b", 15, 31L, "Thermostat", "set",
+                        Map.of("mode", "cool", "targetTemperature", 24), status, status.terminal() ? "NO_CHANGE" : null, null,
+                        CommandSource.flow("f-7f3a", 13, "n-act-1", "m-1"), CommandPriority.AUTO, T));
+            }
+        }
+        SAMPLES.put(EventType.DEVICE_STATE_CHANGED, new DeviceStateChanged(15, 31L, DeviceStateChanged.Connectivity.ONLINE,
+                Map.of("Thermostat", Map.of("mode", "cool", "targetTemperature", 24)),
+                List.of(new StateChange("Thermostat", "mode", "off", "cool")), 8, Map.of(), T, DeviceStateChanged.Origin.COMMAND));
+        SAMPLES.put(EventType.DEVICE_COMMAND_ACK, DeviceCommandAck.acked("8f1c2d3e-0000-4000-8000-000000000001", 15, T, true));
+        SAMPLES.put(EventType.DEVICE_STATE_REPORTED, new DeviceStateReported(15, 8,
+                Map.of("Switch", Map.of("on", true), "Thermostat", Map.of("mode", "cool")), T, true));
+        for (String run : List.of("started", "paused", "resumed", "stopped", "completed", "failed", "throttled")) {
+            SAMPLES.put(EventType.simRun(run), new SimRunChanged(1, 42, run.equals("failed") ? null : 3L, "RUNNING", T, 60,
+                    run.equals("stopped") ? Boolean.TRUE : null, run.equals("failed") ? "tick error" : null, T));
+        }
+        SAMPLES.put(EventType.SIM_FAULT_STARTED, new SimFaultLabel(1, 42L, 9, "STUCK", "SENSOR", "21", T, null,
+                Map.of("value", 27.5)));
+        SAMPLES.put(EventType.SIM_FAULT_ENDED, new SimFaultLabel(1, null, 9, "STUCK", "SENSOR", "21", T, T.plusSeconds(1800),
+                Map.of()));
+        SAMPLES.put(EventType.SIM_DATA_PURGED, new SimDataPurged(1, "job-1", List.of(42L), null, null,
+                new SimDataPurged.DeletedRows(1200, 40, 2, 5)));
+        SAMPLES.put(EventType.FLOW_APPLY_REPORTED, new FlowApplyReported("f-7f3a", "data2flow-flow-engine-0", 13, 2L, 41, null));
+        SAMPLES.put(EventType.FLOW_STATE_CHANGED, new FlowStateChanged("f-7f3a", "ACTIVE", "DEGRADED",
+                FlowStateChanged.Reason.DEGRADED, new FlowStateChanged.Metrics(0.3, 12.5), T));
     }
 
     @ParameterizedTest
     @EnumSource(EventType.class)
-    @DisplayName("ING-05.01 TC-ING-065 모든 M2 이벤트가 봉투 스키마(domain-event.v1.json)를 통과하고 같은 값으로 읽힌다")
+    @DisplayName("ING-05.01 TC-ING-065 모든 M2·M3 이벤트가 봉투 스키마(domain-event.v1.json)를 통과하고 같은 값으로 읽힌다")
     void everyEventRoundTripsAndMatchesSchema(EventType type) {
         EventPayload payload = SAMPLES.get(type);
         assertThat(payload).as("샘플 누락: " + type).isNotNull();
@@ -159,5 +202,48 @@ class DomainEventContractTest {
         assertThatThrownBy(() -> new DomainEvent<>(1, event.messageId(), "x.y", 1, T, null,
                 SAMPLES.get(EventType.SPACE_CHANGED)).eventType()).isInstanceOf(MessageFormatException.class);
         assertThat(EventType.fromRoutingKey("nope")).isEmpty();
+    }
+
+    @Test
+    @DisplayName("SIM-03.04 TC-ACT-038 BR-ACT-25 시뮬레이터가 지금 보내는 ack·reported·실행·장애 JSON과 바이트 모양이 같다(전선 변경 없음)")
+    void simulatorWireShapeUnchanged() {
+        // data2flow-simulator sim/contracts 로컬 record가 만들던 JSON(필드 순서 포함)
+        String ack = "{\"v\":1,\"messageId\":\"5d0c7c1a-9a51-4c43-bf0e-0d6f2d6c4a11\",\"type\":\"device.command.ack\","
+                + "\"organizationId\":1,\"occurredAt\":\"2026-10-03T02:40:09Z\",\"payload\":{\"commandId\":\"c-1\","
+                + "\"deviceId\":15,\"result\":\"FAILED\",\"reason\":\"INVALID_COMMAND\",\"at\":\"2026-10-03T02:40:09Z\","
+                + "\"virtual\":true}}";
+        String run = "{\"v\":1,\"messageId\":\"5d0c7c1a-9a51-4c43-bf0e-0d6f2d6c4a12\",\"type\":\"sim.run.stopped\","
+                + "\"organizationId\":1,\"occurredAt\":\"2026-10-03T02:40:09Z\",\"payload\":{\"organizationId\":1,"
+                + "\"runId\":42,\"scenarioId\":3,\"status\":\"STOPPED\",\"simClock\":\"2026-07-15T05:00:00Z\","
+                + "\"accelerationEffective\":60,\"partial\":true,\"at\":\"2026-10-03T02:40:09Z\"}}";
+        String fault = "{\"v\":1,\"messageId\":\"5d0c7c1a-9a51-4c43-bf0e-0d6f2d6c4a13\",\"type\":\"sim.fault.ended\","
+                + "\"organizationId\":1,\"occurredAt\":\"2026-10-03T02:40:09Z\",\"payload\":{\"organizationId\":1,"
+                + "\"runId\":42,\"faultId\":9,\"kind\":\"STUCK\",\"targetType\":\"SENSOR\",\"targetId\":\"21\","
+                + "\"simFrom\":\"2026-07-15T05:00:00Z\",\"simTo\":\"2026-07-15T05:30:00Z\",\"params\":{\"value\":27.5}}}";
+        String reported = "{\"v\":1,\"messageId\":\"5d0c7c1a-9a51-4c43-bf0e-0d6f2d6c4a14\",\"type\":\"device.state.reported\","
+                + "\"organizationId\":1,\"occurredAt\":\"2026-10-03T02:40:09Z\",\"payload\":{\"deviceId\":15,\"version\":8,"
+                + "\"capabilities\":{\"Switch\":{\"on\":true}},\"reportedAt\":\"2026-10-03T02:40:09Z\",\"virtual\":true}}";
+        for (String json : List.of(ack, run, fault, reported)) {
+            DomainEvent<? extends EventPayload> event = codec.readEvent(json.getBytes());
+            MessageSchemas.assertValid(event);
+            assertThat(codec.writeAsString(event)).isEqualTo(json);
+        }
+        assertThat(codec.readEvent(ack.getBytes(), DeviceCommandAck.class).payload().result())
+                .isEqualTo(DeviceCommandAck.Result.FAILED);
+        assertThat(DeviceCommandAck.failed("c-1", 15, "INVALID_COMMAND", T, true).reason()).isEqualTo("INVALID_COMMAND");
+    }
+
+    @Test
+    @DisplayName("ACT-02.02 EVT-ACT-01 상태별 이벤트 종류와 EVT-SIM-01 실행 이벤트 종류를 찾는다")
+    void m3TypeLookups() {
+        assertThat(EventType.commandStatus(CommandStatus.APPLIED).routingKey()).isEqualTo("command.status.applied");
+        assertThat(EventType.commandStatus(CommandStatus.QUEUED_FOR_DOWNLINK).routingKey())
+                .isEqualTo("command.status.queued_for_downlink");
+        assertThat(EventType.commandStatus(CommandStatus.APPLIED).eventId()).isEqualTo("EVT-ACT-01");
+        assertThatThrownBy(() -> EventType.commandStatus(CommandStatus.UNKNOWN)).isInstanceOf(IllegalArgumentException.class);
+        assertThat(EventType.simRun("throttled")).isEqualTo(EventType.SIM_RUN_THROTTLED);
+        assertThatThrownBy(() -> EventType.simRun("exploded")).isInstanceOf(IllegalArgumentException.class);
+        assertThat(EventType.DEVICE_STATE_REPORTED.eventId()).isEqualTo("EVT-ACT-07");
+        assertThat(codec.mapper().readValue("\"LOST\"", DeviceCommandAck.Result.class)).isEqualTo(DeviceCommandAck.Result.UNKNOWN);
     }
 }

@@ -1,0 +1,1 @@
+{"v":1,"messageId":"5d0c7c1a-9a51-4c43-bf0e-0d6f2d6c4a15","type":"sim.fault.started","organizationId":1,"occurredAt":"2026-10-03T01:05:00Z","payload":{"organizationId":1,"runId":42,"faultId":9,"kind":"STUCK","targetType":"SENSOR","targetId":"21","simFrom":"2026-07-15T05:00:00Z","params":{"value":27.5}}}
