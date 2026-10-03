@@ -89,6 +89,8 @@ public enum EventType {
     SIM_RUN_COMPLETED("sim.run.completed", "EVT-SIM-01", SimRunChanged.class),
     SIM_RUN_FAILED("sim.run.failed", "EVT-SIM-01", SimRunChanged.class),
     SIM_RUN_THROTTLED("sim.run.throttled", "EVT-SIM-01", SimRunChanged.class),
+    /** 실행 초기화(API-SIM-34 reset → CREATED). 시뮬레이터가 M3부터 내던 키 */
+    SIM_RUN_RESET("sim.run.reset", "EVT-SIM-01", SimRunChanged.class),
     SIM_FAULT_STARTED("sim.fault.started", "EVT-SIM-02", SimFaultLabel.class),
     SIM_FAULT_ENDED("sim.fault.ended", "EVT-SIM-02", SimFaultLabel.class),
     SIM_DATA_PURGED("sim.data.purged", "EVT-SIM-04", SimDataPurged.class),
@@ -138,7 +140,7 @@ public enum EventType {
     }
 
     /**
-     * EVT-SIM-01 실행 상태 이벤트 종류. {@code event}는 라우팅 키 끝(started, paused, resumed, stopped, completed, failed, throttled)
+     * EVT-SIM-01 실행 상태 이벤트 종류. {@code event}는 라우팅 키 끝(started, paused, resumed, stopped, completed, failed, throttled, reset)
      */
     public static EventType simRun(String event) {
         return fromRoutingKey(SIM_RUN_PREFIX + event)

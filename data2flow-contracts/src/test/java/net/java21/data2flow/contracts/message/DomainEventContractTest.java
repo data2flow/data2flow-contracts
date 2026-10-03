@@ -115,7 +115,7 @@ class DomainEventContractTest {
         SAMPLES.put(EventType.DEVICE_COMMAND_ACK, DeviceCommandAck.acked("8f1c2d3e-0000-4000-8000-000000000001", 15, T, true));
         SAMPLES.put(EventType.DEVICE_STATE_REPORTED, new DeviceStateReported(15, 8,
                 Map.of("Switch", Map.of("on", true), "Thermostat", Map.of("mode", "cool")), T, true));
-        for (String run : List.of("started", "paused", "resumed", "stopped", "completed", "failed", "throttled")) {
+        for (String run : List.of("started", "paused", "resumed", "stopped", "completed", "failed", "throttled", "reset")) {
             SAMPLES.put(EventType.simRun(run), new SimRunChanged(1, 42, run.equals("failed") ? null : 3L, "RUNNING", T, 60,
                     run.equals("stopped") ? Boolean.TRUE : null, run.equals("failed") ? "tick error" : null, T));
         }
@@ -242,6 +242,7 @@ class DomainEventContractTest {
         assertThat(EventType.commandStatus(CommandStatus.APPLIED).eventId()).isEqualTo("EVT-ACT-01");
         assertThatThrownBy(() -> EventType.commandStatus(CommandStatus.UNKNOWN)).isInstanceOf(IllegalArgumentException.class);
         assertThat(EventType.simRun("throttled")).isEqualTo(EventType.SIM_RUN_THROTTLED);
+        assertThat(EventType.simRun("reset").routingKey()).isEqualTo("sim.run.reset");
         assertThatThrownBy(() -> EventType.simRun("exploded")).isInstanceOf(IllegalArgumentException.class);
         assertThat(EventType.DEVICE_STATE_REPORTED.eventId()).isEqualTo("EVT-ACT-07");
         assertThat(codec.mapper().readValue("\"LOST\"", DeviceCommandAck.Result.class)).isEqualTo(DeviceCommandAck.Result.UNKNOWN);

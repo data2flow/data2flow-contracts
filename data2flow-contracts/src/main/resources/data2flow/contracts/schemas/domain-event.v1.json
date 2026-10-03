@@ -86,6 +86,7 @@
     "sim.run.completed": "simRunChanged",
     "sim.run.failed": "simRunChanged",
     "sim.run.throttled": "simRunChanged",
+    "sim.run.reset": "simRunChanged",
     "sim.fault.started": "simFaultLabel",
     "sim.fault.ended": "simFaultLabel",
     "sim.data.purged": "simDataPurged",
@@ -877,6 +878,25 @@
         "properties": {
           "type": {
             "const": "sim.run.throttled"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/simRunChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "sim.run.reset"
           }
         },
         "required": [

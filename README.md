@@ -466,7 +466,7 @@ CommandPayload cmd = req.commandPayload();
 | DEVICE_STATE_CHANGED EVT-ACT-02 | `device.state.changed` | `DeviceStateChanged` | action → flow·core·simulator |
 | DEVICE_COMMAND_ACK EVT-ACT-06 = EVT-SIM-03 | `device.command.ack` | `DeviceCommandAck` | simulator·드라이버 어댑터 → action |
 | DEVICE_STATE_REPORTED EVT-ACT-07 = EVT-SIM-03 | `device.state.reported` | `DeviceStateReported` | simulator·드라이버 어댑터 → action |
-| `simRun(event)` EVT-SIM-01 | `sim.run.{started…throttled}` | `SimRunChanged` | simulator → core·analytics |
+| `simRun(event)` EVT-SIM-01 | `sim.run.{started\|paused\|resumed\|stopped\|completed\|failed\|throttled\|reset}` | `SimRunChanged` | simulator → core·analytics |
 | SIM_FAULT_STARTED·ENDED EVT-SIM-02 | `sim.fault.{started\|ended}` | `SimFaultLabel` | simulator → analytics·core |
 | SIM_DATA_PURGED EVT-SIM-04 | `sim.data.purged` | `SimDataPurged` | core → core·analytics |
 | FLOW_APPLY_REPORTED EVT-FLW-02 | `flow.apply.reported` | `FlowApplyReported` | flow-engine → core |
