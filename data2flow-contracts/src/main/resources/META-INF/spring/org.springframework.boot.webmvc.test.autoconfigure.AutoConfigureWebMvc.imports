@@ -1,1 +1,2 @@
 net.java21.data2flow.contracts.web.ContractsWebAutoConfiguration
+net.java21.data2flow.contracts.authz.ContractsAuthorizationAutoConfiguration

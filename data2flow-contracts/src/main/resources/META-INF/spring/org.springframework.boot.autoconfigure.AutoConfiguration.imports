@@ -1,2 +1,3 @@
 net.java21.data2flow.contracts.web.ContractsWebAutoConfiguration
+net.java21.data2flow.contracts.authz.ContractsAuthorizationAutoConfiguration
 net.java21.data2flow.contracts.secret.SecretsAutoConfiguration
