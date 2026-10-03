@@ -79,6 +79,7 @@ data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비�
 
 `GatewayIdentityFilter`가 gateway가 넣은 `X-USER-ID`·`X-ORG-ID`(장기 토큰이면 `X-ACCESS-TOKEN-ID`·`X-TOKEN-SCOPE`)를 읽어 `CurrentUserHolder`에 담습니다.
 
+- 웹 Access 토큰 요청에는 gateway가 로그인 세션 ID `X-SESSION-ID`(`DataflowHeaders.SESSION_ID`, introspection `sid`)도 넣습니다. 밖에서 들어온 같은 이름의 헤더는 항상 지워지므로 서비스는 이 값을 믿고 "이 기기" 표시 등에 씁니다(`CurrentUser`에는 담지 않습니다).
 - 신원이 필요한 경로에서 헤더가 없거나 숫자가 아니면 401 `AUTH_TOKEN_INVALID`(+ `WWW-Authenticate: Bearer error="invalid_token"`)입니다.
 - 신원이 선택인 경로는 기본으로 `/internal/**`, `/actuator/**`, `/error`입니다. 헤더가 있으면 담고, 형식이 틀리면 401입니다.
 - 공개 경로는 서비스 설정으로 더합니다. 예: auth의 로그인.

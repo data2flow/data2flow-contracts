@@ -5,7 +5,7 @@ import java.util.Locale;
 
 /**
  * 서비스 사이에 오가는 헤더 이름(design/api-rules.md §6, design/auth.md §5).
- * X-USER-ID·X-ORG-ID·토큰 헤더는 gateway만 넣는다. gateway는 밖에서 들어온 같은 이름의 헤더를 먼저 지운다
+ * X-USER-ID·X-ORG-ID·X-SESSION-ID·토큰 헤더는 gateway만 넣는다. gateway는 밖에서 들어온 같은 이름의 헤더를 먼저 지운다
  * ({@link #isGatewayOwned(String)}).
  */
 public final class DataflowHeaders {
@@ -16,6 +16,11 @@ public final class DataflowHeaders {
     public static final String ACCESS_TOKEN_ID = "X-ACCESS-TOKEN-ID";
     /** 장기 토큰 범위, 공백 또는 쉼표로 구분 (auth.md §5) */
     public static final String TOKEN_SCOPE = "X-TOKEN-SCOPE";
+    /**
+     * 웹 로그인 세션 ID(introspection {@code sid}). gateway가 웹 Access 토큰 요청에만 넣는다(auth.md §5).
+     * core는 "이 기기" 표시와 비밀번호 변경 때 현재 세션 유지에 쓴다(API-IAM-12, API-IAM-16)
+     */
+    public static final String SESSION_ID = "X-SESSION-ID";
     public static final String REQUEST_ID = "X-REQUEST-ID";
     /** 내부 호출에서 호출한 서비스 이름(토큰 대신 표시만 한다, ADR-021) */
     public static final String CALLER_SERVICE = "X-CALLER-SERVICE";
@@ -23,7 +28,8 @@ public final class DataflowHeaders {
     public static final String RETRY_AFTER = "Retry-After";
 
     /** gateway가 밖에서 들어온 요청에서 지우는 헤더(정확한 이름) */
-    public static final List<String> IDENTITY_HEADERS = List.of(USER_ID, ORG_ID, ACCESS_TOKEN_ID, TOKEN_SCOPE, CALLER_SERVICE);
+    public static final List<String> IDENTITY_HEADERS = List.of(USER_ID, ORG_ID, SESSION_ID, ACCESS_TOKEN_ID, TOKEN_SCOPE,
+            CALLER_SERVICE);
     /** gateway가 밖에서 들어온 요청에서 지우는 헤더(접두사, auth.md §5 "X-TOKEN-*, X-INTERNAL-*") */
     public static final List<String> IDENTITY_HEADER_PREFIXES = List.of("X-TOKEN-", "X-INTERNAL-", "X-ACCESS-TOKEN-");
 

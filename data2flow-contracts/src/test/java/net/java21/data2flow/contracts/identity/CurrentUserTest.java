@@ -42,6 +42,7 @@ class CurrentUserTest {
         assertThat(DataflowHeaders.isGatewayOwned("X-TOKEN-WORKSPACE")).isTrue();
         assertThat(DataflowHeaders.isGatewayOwned("X-Internal-Auth")).isTrue();
         assertThat(DataflowHeaders.isGatewayOwned("X-ACCESS-TOKEN-ID")).isTrue();
+        assertThat(DataflowHeaders.isGatewayOwned("x-session-id")).as("현재 세션 ID도 gateway만 넣는다").isTrue();
         assertThat(DataflowHeaders.isGatewayOwned("X-REQUEST-ID")).isFalse();
         assertThat(DataflowHeaders.isGatewayOwned(null)).isFalse();
     }
