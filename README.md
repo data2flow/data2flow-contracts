@@ -1,6 +1,6 @@
 # data2flow-contracts
 
-data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비스를 만드는 백엔드 개발자가 읽습니다. 다 읽으면 서비스에 의존성을 넣고, 신원 필터·권한 검사(RoleChecker)·감사 기록·`Idempotency-Key`·`baseVersion`·호출 한도 응답·비밀값 암호화와 가림·ArchUnit 규칙을 연결하고, 수집 경로(M2)의 메시지 계약·디코더 SPI·커넥터 SPI와 계약 테스트 키트·메시지 추적 전파를 쓸 수 있습니다.
+data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비스를 만드는 백엔드 개발자가 읽습니다. 다 읽으면 서비스에 의존성을 넣고, 신원 필터·권한 검사(RoleChecker)·감사 기록·`Idempotency-Key`·`baseVersion`·호출 한도 응답·비밀값 암호화와 가림·ArchUnit 규칙을 연결하고, 수집 경로(M2)의 메시지 계약·디코더 SPI·커넥터 SPI와 계약 테스트 키트·메시지 추적 전파, 가상 폐루프(M3)의 기능(Capability) 카탈로그·명령 검증·상태 쌍·행동 요청·제어/시뮬레이터/플로우 이벤트를 쓸 수 있습니다.
 
 규칙의 정본은 `data2flow-docs`의 `design/api-rules.md`(ADR-035), `design/auth.md` §7, `design/conventions.md` §3, `design/testing/backend.md` §6입니다. 이 문서는 그 규칙을 코드에서 어떻게 쓰는지만 설명합니다.
 
@@ -26,16 +26,20 @@ data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비�
 | `ratelimit` | OPS-12.05 | `RateLimitInfo`, `RateLimitRejection`, `RateLimitHeaders` |
 | `secret` | NFR-03.02 | `Secret`, `SecretCipher`, `SecretKeyRing`, `SecretMasker`, `SecretMaskingJsonMembersCustomizer`, `SecretMaskingMessageConverter` |
 | `error` | OPS-12.01 | `ErrorCode`, `CommonErrorCode`(공통 코드 19개), `BusinessException` |
-| `message` | ING-01.01·02.01·05.01 | `Message`, `@MessageSchema`, `MessageCodec`, `MessageSchemas`, `RawEnvelope`, `CanonicalTelemetry`, `ConfigChangedMessage`, `DomainEvent`, `EventType`, `SourceTypes`, `Quality` |
+| `message` | ING-01.01·02.01·05.01·ACT-02.01 | `Message`, `@MessageSchema`, `MessageCodec`, `MessageSchemas`, `RawEnvelope`, `CanonicalTelemetry`, `ConfigChangedMessage`, `DomainEvent`, `EventType`, `SourceTypes`, `Quality`, `ActionRequest` |
 | `message.event` | EVT-DEV·DSC·ING·TSD(M2) | `DeviceChanged`, `DeviceConnectivityChanged`, `DevicePendingCreated`, `SpaceChanged`, `GroupMembershipChanged`, `SourceRuntimeReported`, `SourceStatsReported`, `SourceConnectionChanged`, `SourceDataActivity`, `ConnectorCatalogReported`, `MetricUnverifiedRegistered`, `IngestAlert`, `IngestGapDetected`, `ClockSkewSuspected`, `AggregatesRecomputed`, `PartitionWarning` |
+| `message.event` | EVT-ACT·SIM·FLW(M3) | `CommandStatusChanged`, `DeviceStateChanged`, `DeviceCommandAck`, `DeviceStateReported`, `SimRunChanged`, `SimFaultLabel`, `SimDataPurged`, `FlowApplyReported`, `FlowStateChanged` |
+| `capability` | ACT-01.01~01.04·02.04·06.04 | `StandardCapabilities`, `CapabilityCatalog`, `CapabilityDefinition`, `CapabilityAttribute`, `CapabilityCommand`, `ExpectedEffect`, `AttributeConstraint`, `CommandArgsValidator`, `CommandValidation`, `ArgViolation`, `DeviceShadow`, `CapabilityStates`, `StateChange` |
+| `command` | ACT-02.01~02.05·FLW-05.02 | `CommandSource`, `SourceType`, `CommandPriority`, `CommandStatus`, `CommandStatusReasons`, `CommandTarget`, `CommandPayload`, `ActionKind`, `ActionIdempotencyKeys` |
+| `flow` | FLW-01.01·02(카탈로그) | `FlowDefinition`, `FlowNode`, `FlowNodeType` |
 | `message.decoder` | ING-02.01 | `PayloadDecoder`, `DecodedUplink`, `DecodedValue`, `DecodeException`, `DecoderKeys` |
 | `connector` | DSC-09.02 | `SourceConnector`, `ConnectorSession`, `RawSink`, `ConnectorDescriptor`, `ConnectorContext`, `SourceConfig`, `ConnectorStatus`, `ConnectionTestResult`, `ConnectorCatalogEntry`, `AckMode`, `ScalingMode` |
-| `messaging` | ING-01.01·05.01·OPS-02.03 | `MessagingNames`, `SuperStreamSpec`, `ConsumerGroups`, `StreamRoutingKeys`, `DedupKeys`, `ClientIds`, `MessageHeaders`, `MessageTracing` |
+| `messaging` | ING-01.01·05.01·OPS-02.03·ACT-02.01 | `MessagingNames`, `SuperStreamSpec`, `QuorumQueueSpec`, `ConsumerGroups`, `StreamRoutingKeys`, `DedupKeys`, `ClientIds`, `MessageHeaders`, `MessageTracing` |
 
 ## 2. 빌드
 
 ```bash
-./mvnw verify      # 단위·슬라이스(*Test) + 통합(*IT, Testcontainers PostgreSQL 18·RabbitMQ 3.13 Stream) + 커버리지 80% 검사
+./mvnw verify      # 단위·슬라이스(*Test) + 통합(*IT, Testcontainers PostgreSQL 18·RabbitMQ 3.13 Stream·Quorum) + 커버리지 80% 검사
 ./mvnw install     # 로컬 저장소에 설치(다른 서비스 로컬 빌드용)
 ```
 
@@ -302,7 +306,8 @@ RabbitMQ로 오가는 메시지는 모두 JSON이고 스키마 버전 `v`와 `me
 | `RawEnvelope` v1 (EVT-ING-01) | Super Stream `data2flow.raw` | `raw-envelope.v1.json` | ingress·simulator → pipeline |
 | `CanonicalTelemetry` v1 (EVT-ING-02) | Super Stream `data2flow.telemetry` | `canonical-telemetry.v1.json` | pipeline → flow-engine·analytics·core-api(실시간) |
 | `ConfigChangedMessage` v1 (EVT-DEV-04·DSC-01·SCR-01·ING-08) | fanout `data2flow.config` | `config-changed.v1.json` | core-api → 모든 서비스(받으면 DB에서 다시 읽음) |
-| `DomainEvent<P>` v1 (EVT-DEV·DSC·ING·TSD) | topic `data2flow.events`, 라우팅 키 = `type` | `domain-event.v1.json` | 각 생산 서비스 → `{service}.events` |
+| `DomainEvent<P>` v1 (EVT-DEV·DSC·ING·TSD·ACT·SIM·FLW) | topic `data2flow.events`, 라우팅 키 = `type` | `domain-event.v1.json` | 각 생산 서비스 → `{service}.events` |
+| `ActionRequest` v1 (ACT-api §5.1, EVT-FLW-05) | direct `data2flow.actions`, 라우팅 키 = kind(`command`·`notify`·`sink`) | `action-request.v1.json` | flow-engine·core-api(아웃박스) → action(§18.4) |
 
 ```java
 MessageCodec codec = MessageCodec.create();                 // 서비스에 하나, 스레드 안전
@@ -374,7 +379,110 @@ try (Tracer.SpanInScope scope = tracing.inScope(span)) { handle(message); } fina
 
 > 사용자 JS 샌드박스(GraalJS, ADR-008)는 이 라이브러리에 없습니다. 스펙 배치(SCR-02.01·02.02)가 data2flow-pipeline이므로 pipeline이 만듭니다. GraalJS 버전(`polyglot`·`js-community`)만 BOM이 정합니다.
 
-## 18. 설정 키 요약
+## 18. 제어 계약: 기능·명령·상태 쌍 (M3, ACT-01·02, ADR-009)
+
+화면·플로우·AI 어디서 제어하든 명령은 "기기 + 기능(Capability) + 명령 + 인자" 한 모양이고 action의 제어 창구 하나를 거칩니다. 이 라이브러리는 그 모양과 검증만 주고, 권한·인터락·보호·드라이버 호출은 action이 합니다.
+
+### 18.1 기능 카탈로그 (ACT-01.01·01.02·01.04)
+
+표준 기능 7종의 정본은 JSON 파일 `classpath:data2flow/contracts/capabilities/{이름}.json`(웹·AI도 같은 파일)이고 형식은 `capability-definition.v1.json`입니다. 명령은 모두 목표 상태 설정 `set`입니다(BR-ACT-03).
+
+| 기능 | 속성 | `set` 인자 | Matter |
+|---|---|---|---|
+| Switch | on: boolean | `{on}` 필수 | OnOff |
+| Thermostat | mode: off·cool·heat·dry·fan·auto, targetTemperature: 5~35 °C·0.5 간격, currentTemperature(읽기 전용) | `{mode?, targetTemperature?}` 1개 이상 | Thermostat |
+| FanSpeed | level: 0 이상 정수(최댓값은 모델 제약), auto: boolean | `{level?, auto?}` 1개 이상 | FanControl |
+| Ventilation | mode: off·on·auto, level: 1~3 | `{mode?, level?}` 1개 이상 | FanControl |
+| Dimmer | level: 0~100 % | `{level}` 필수 | LevelControl |
+| Lock | locked: boolean, battery %(읽기 전용) | `{locked}` 필수 | DoorLock |
+| Contact | open: boolean(읽기 전용) | 명령 없음 | BooleanState |
+
+```java
+CapabilityCatalog catalog = CapabilityCatalog.of(customDefinitions);   // 표준 + 조직의 custom.*(BR-ACT-22 이름 검사)
+StandardCapabilities.requireCustomName("custom.Humidifier");           // 표준 이름이면 예외 → CAPABILITY_NAME_RESERVED
+```
+
+### 18.2 명령 검증 (BR-ACT-01: 기능 스키마 → 모델 제약 → 조직 절대 한계)
+
+```java
+CommandValidation r = CommandArgsValidator.validate(catalog, "Thermostat", "set", Map.of("targetTemperature", 31),
+        modelConstraints,   // {targetTemperature: AttributeConstraint.range(18, 30)} (ACT-01.03)
+        absoluteLimits);    // {targetTemperature: AttributeConstraint.range(18, 28)} (ACT-06.04)
+if (!r.ok()) throw new BusinessException(ActionErrorCode.valueOf(r.resultCode().get()), r.fieldErrors());
+// r.violations().get(0): field=args.targetTemperature, reason=MODEL_CONSTRAINT, min=18, max=30
+```
+
+| 위반(`ArgViolation.Reason`) | `resultCode()` |
+|---|---|
+| CAPABILITY_NOT_SUPPORTED, COMMAND_NOT_SUPPORTED | `CAPABILITY_NOT_SUPPORTED` |
+| UNKNOWN_ARG(읽기 전용 포함)·MISSING_ARG·TOO_FEW_ARGS·WRONG_TYPE·NOT_ALLOWED_VALUE·OUT_OF_STANDARD_RANGE·STEP_MISMATCH | `COMMAND_ARGS_INVALID` |
+| MODEL_CONSTRAINT | `COMMAND_ARG_OUT_OF_RANGE` |
+| ABSOLUTE_LIMIT | `COMMAND_ABSOLUTE_LIMIT` |
+
+앞 단계에서 걸리면 뒤 단계는 보지 않습니다. 검증기는 외부 라이브러리 없이 동작하고, 명령 인자 JSON Schema와 판정이 같은지 계약 테스트가 확인합니다. 조직 한계 설정 검사(LIMIT_WIDER_THAN_MODEL)는 `limit.within(model)`, 화면 컨트롤 범위(API-ACT-03 effectiveConstraints)는 `model.intersect(limit)`입니다.
+
+### 18.3 상태 쌍 (ACT-02.04, BR-ACT-04·05)
+
+```java
+DeviceShadow s = shadow.withDesired("Thermostat", args);                  // desiredVersion + 1
+Optional<DeviceShadow> next = s.withReported(version, capabilities, at);   // 버전이 크지 않으면 빈 값(버림)
+next.get().isApplied("Thermostat", args);   // APPLIED 판정(24 == 24.0)
+s.noChange("Switch", Map.of("on", true));   // SKIPPED(NO_CHANGE)
+CapabilityStates.changes(before, after);    // EVT-ACT-02 changed[]
+```
+
+### 18.4 행동 요청과 큐 (ACT-api §5.1, EVT-FLW-05, ADR-020)
+
+`ActionRequest` v1(`action-request.v1.json`)은 direct exchange `data2flow.actions`로 갑니다.
+
+| kind | 라우팅 키 | Quorum 큐(`QuorumQueueSpec`) |
+|---|---|---|
+| COMMAND, SCENE | `command` | `action.commands`(prefetch 20) |
+| NOTIFY | `notify` | `action.notifications` |
+| SINK | `sink` | `action.sinks` |
+
+모든 큐는 `x-delivery-limit=5`, DLX `data2flow.dlx`(라우팅 키 = 큐 이름) → `{queue}.dlq`이고 선언 인자는 `spec.arguments()`입니다. 서비스 이벤트 큐는 `QuorumQueueSpec.events("action")` → `action.events`.
+
+```java
+// flow-engine 제어 노드 → 아웃박스
+String key = ActionIdempotencyKeys.flow(flowId, nodeId, triggerMessageId);   // sha256, 버전 제외(BR-FLW-13)
+ActionRequest req = ActionRequest.command(orgId, key, CommandSource.flow(flowId, version, nodeId, triggerMessageId),
+        validUntil, new CommandPayload(CommandTarget.space(31, "controls", "Thermostat", false), "Thermostat", "set",
+        Map.of("mode", "cool", "targetTemperature", 24), true), clock);      // priority = AUTO(출처가 정함, BR-ACT-24)
+outbox.insert(req.idempotencyKey(), req.routingKey(), codec.write(req));
+
+// action 소비
+ActionRequest req = codec.read(body, ActionRequest.class);
+CommandPayload cmd = req.commandPayload();
+```
+
+우선순위는 `CommandPriority.forSource`(USER·BULK=MANUAL, SYSTEM=SAFETY, SCHEDULE, FLOW·RULE=AUTO, AI)로만 정하고 장면은 `forScene(실행 출처)`입니다. `CommandSource.requireComplete()`는 출처별 필수 칸(AI는 승인자)을 확인합니다(BR-ACT-15).
+
+### 18.5 M3 도메인 이벤트 (`data2flow.events`)
+
+| 종류(`EventType`) | 라우팅 키 | 페이로드 | 생산 → 소비 |
+|---|---|---|---|
+| `commandStatus(status)` EVT-ACT-01 | `command.status.{소문자}`(예: `command.status.applied`, `command.status.queued_for_downlink`) | `CommandStatusChanged` | action → core·flow·ai |
+| DEVICE_STATE_CHANGED EVT-ACT-02 | `device.state.changed` | `DeviceStateChanged` | action → flow·core·simulator |
+| DEVICE_COMMAND_ACK EVT-ACT-06 = EVT-SIM-03 | `device.command.ack` | `DeviceCommandAck` | simulator·드라이버 어댑터 → action |
+| DEVICE_STATE_REPORTED EVT-ACT-07 = EVT-SIM-03 | `device.state.reported` | `DeviceStateReported` | simulator·드라이버 어댑터 → action |
+| `simRun(event)` EVT-SIM-01 | `sim.run.{started…throttled}` | `SimRunChanged` | simulator → core·analytics |
+| SIM_FAULT_STARTED·ENDED EVT-SIM-02 | `sim.fault.{started\|ended}` | `SimFaultLabel` | simulator → analytics·core |
+| SIM_DATA_PURGED EVT-SIM-04 | `sim.data.purged` | `SimDataPurged` | core → core·analytics |
+| FLOW_APPLY_REPORTED EVT-FLW-02 | `flow.apply.reported` | `FlowApplyReported` | flow-engine → core |
+| FLOW_STATE_CHANGED EVT-FLW-03 | `flow.state.changed` | `FlowStateChanged` | flow-engine → core·action |
+
+### 18.6 플로우 정의와 노드 카탈로그 (FLW-api §5, API-FLW-30)
+
+`FlowDefinition`(`flow-definition.v1.json`, 표시 `data2flow.flow-definition/v1`)은 core-api 저장 검증·flow-engine 컴파일·웹 캔버스가 같이 씁니다. 노드 `config`는 종류별 `FlowNodeType.configSchema`(`flow-node-type.v1.json`)가 정하고, 노드 ID 중복·없는 노드 연결은 `structuralErrors()`가 봅니다.
+
+### 18.7 공유 픽스처 (TC-ACT-027, TC-SIM-036)
+
+`MessageFixtures.actionRequest("flow-command-heatwave")`(플로우 "고온이면 냉방" 제어 노드), `"user-command-device"`(모르는 필드 포함), `MessageFixtures.domainEvent("device-command-ack-virtual")` 등 M3 이벤트 5종. flow-engine 생산자와 action 소비자가 같은 파일로 계약 테스트를 합니다.
+
+> 드라이버 SPI(`DeviceDriver`)와 드라이버 계약 테스트 키트는 SPI 패키지가 action(`net.java21.data2flow.action.actuation.driver`)에 있으므로 action이 둡니다(ACT-api §5.3).
+
+## 19. 설정 키 요약
 
 | 키 | 기본값 | 설명 |
 |---|---|---|
