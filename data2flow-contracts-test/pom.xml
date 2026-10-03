@@ -12,7 +12,7 @@
 
     <artifactId>data2flow-contracts-test</artifactId>
     <name>data2flow-contracts-test</name>
-    <description>서비스 테스트 키트(test 범위로 쓴다): 공통 ArchUnit 규칙(조직 조건 강제 BR-IAM-01, Thread.sleep 금지, 시스템 시계 직접 호출 금지). design/testing/backend.md §6</description>
+    <description>서비스 테스트 키트(test 범위로 쓴다): 공통 ArchUnit 규칙(조직 조건 강제 BR-IAM-01, Thread.sleep 금지, 시스템 시계 직접 호출 금지), 커넥터 계약 테스트 키트(DSC-09.02), 공유 메시지 픽스처(TC-ING-033·065). design/testing/backend.md §6</description>
 
     <dependencyManagement>
         <dependencies>
@@ -38,6 +38,25 @@
             <artifactId>archunit</artifactId>
             <version>${archunit.version}</version>
         </dependency>
+        <!-- 커넥터 계약 테스트 키트(AbstractConnectorContractTest): JUnit 5(EPL-2.0, 수정 없이 사용)·AssertJ·Awaitility(Apache-2.0) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+        </dependency>
+        <!-- 공유 메시지 픽스처의 JSON Schema 검사(MessageSchemas): Apache-2.0 -->
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${json-schema-validator.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -47,6 +66,12 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- 키트가 잘못된 커넥터를 실제로 떨어뜨리는지 JUnit 엔진으로 실행해 확인한다 -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-testkit</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
