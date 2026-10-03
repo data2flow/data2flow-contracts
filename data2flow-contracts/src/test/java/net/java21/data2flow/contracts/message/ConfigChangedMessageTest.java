@@ -57,6 +57,19 @@ class ConfigChangedMessageTest {
     }
 
     @Test
+    @DisplayName("ACT-01.04 ACT-03.05 CAPABILITY(기능 이름)·DRIVER(드라이버 ID) 변경 메시지가 스키마를 통과하고 읽힌다")
+    void capabilityAndDriverEntityTypes() {
+        ConfigChangedMessage capability = new ConfigChangedMessage(ConfigChangedMessage.VERSION, java.util.UUID.randomUUID(),
+                EntityType.CAPABILITY, "AirPurifierMode", 2, Op.UPSERT, "1", clock.instant());
+        ConfigChangedMessage driver = ConfigChangedMessage.upsert(EntityType.DRIVER, 12, 4, 1, clock);
+        MessageSchemas.assertValid(capability);
+        MessageSchemas.assertValid(driver);
+        assertThat(codec.read(codec.write(capability), ConfigChangedMessage.class)).isEqualTo(capability);
+        assertThat(codec.read(DOC_EXAMPLE.replace("\"DEVICE\"", "\"DRIVER\""), ConfigChangedMessage.class).entityType())
+                .isEqualTo(EntityType.DRIVER);
+    }
+
+    @Test
     @DisplayName("필수 필드가 없으면 MessageFormatException")
     void requiredFields() {
         assertThatThrownBy(() -> codec.read(DOC_EXAMPLE.replace("\"id\": \"1042\",", ""), ConfigChangedMessage.class))

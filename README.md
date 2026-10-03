@@ -458,6 +458,8 @@ CommandPayload cmd = req.commandPayload();
 
 우선순위는 `CommandPriority.forSource`(USER·BULK=MANUAL, SYSTEM=SAFETY, SCHEDULE, FLOW·RULE=AUTO, AI)로만 정하고 장면은 `forScene(실행 출처)`입니다. `CommandSource.requireComplete()`는 출처별 필수 칸(AI는 승인자)을 확인합니다(BR-ACT-15).
 
+출처 공간 `source.spaceId`(선택, `CommandSource.flow(…, spaceId)`·`withSpaceId`)는 플로우·규칙이 판단한 공간(트리거·대상 공간)입니다. action은 기기 대상(`target.deviceId`) 명령에서도 이 값으로 샌드박스 판정(BR-ACT-23)을 하고, 없으면 `target.spaceId`를 씁니다. 설정 변경 `ConfigChangedMessage.EntityType`에는 `CAPABILITY`(id = 사용자 정의 기능 이름)와 `DRIVER`(id = 드라이버 ID)가 있어 action이 그 기능·드라이버를 쓰는 제어 프로필만 지웁니다(ADR-043 열린 요청 ①②).
+
 ### 18.5 M3 도메인 이벤트 (`data2flow.events`)
 
 | 종류(`EventType`) | 라우팅 키 | 페이로드 | 생산 → 소비 |

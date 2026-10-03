@@ -138,6 +138,11 @@
         "approvedBy": {
           "type": "integer",
           "minimum": 1
+        },
+        "spaceId": {
+          "description": "출처 공간(선택). 플로우·규칙이 판단한 공간. action이 기기 대상 명령의 샌드박스 판정(BR-ACT-23)에 쓴다",
+          "type": "integer",
+          "minimum": 1
         }
       }
     },

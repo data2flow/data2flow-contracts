@@ -1,0 +1,17 @@
+{
+  "v": 1,
+  "messageId": "0b8f6a52-3c1d-4e2f-9a7b-5c6d7e8f9a02",
+  "idempotencyKey": "7b1f2f4b2c7e9d3a8b5c4d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2b",
+  "kind": "COMMAND",
+  "organizationId": 1,
+  "createdAt": "2026-10-03T01:12:03.450Z",
+  "source": {"type": "FLOW", "flowId": "f-7f3a", "flowVersion": 13, "nodeId": "n-act-1", "triggerMessageId": "7f3a9c1e-2b4d-4f6a-8c0e-1a2b3c4d5e6f", "spaceId": 31},
+  "priority": "AUTO",
+  "payload": {
+    "target": {"deviceId": 501},
+    "capability": "Thermostat",
+    "command": "set",
+    "args": {"mode": "cool", "targetTemperature": 24},
+    "awaitResult": true
+  }
+}

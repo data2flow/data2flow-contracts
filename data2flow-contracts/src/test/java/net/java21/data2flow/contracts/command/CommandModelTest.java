@@ -72,6 +72,21 @@ class CommandModelTest {
         assertThat(mapper.writeValueAsString(CommandSource.user(7))).isEqualTo("{\"type\":\"USER\",\"userId\":7}");
     }
 
+    @Test
+    @DisplayName("SIM-07.03 BR-ACT-23 출처 공간(source.spaceId)은 선택이고, 플로우 출처에 적으면 직렬화되며 1 이상이어야 한다")
+    void sourceSpace() {
+        CommandSource flow = CommandSource.flow("f-1", 3, "n-act", "m-1", 31L);
+        assertThat(flow.spaceId()).isEqualTo(31L);
+        assertThat(flow.requireComplete().priority()).isEqualTo(CommandPriority.AUTO);
+        assertThat(mapper.writeValueAsString(flow)).contains("\"spaceId\":31");
+        assertThat(CommandSource.flow("f-1", 3, "n-act", "m-1").spaceId()).isNull();
+        assertThat(mapper.writeValueAsString(CommandSource.flow("f-1", 3, "n-act", "m-1"))).doesNotContain("spaceId");
+        assertThat(mapper.readValue("{\"type\":\"FLOW\",\"flowId\":\"f\",\"nodeId\":\"n\"}", CommandSource.class).spaceId())
+                .isNull();
+        assertThat(CommandSource.user(7).withSpaceId(5L).spaceId()).isEqualTo(5L);
+        assertThatThrownBy(() -> CommandSource.flow("f-1", 3, "n-act", "m-1", 0L)).isInstanceOf(IllegalArgumentException.class);
+    }
+
     @ParameterizedTest
     @EnumSource(value = CommandStatus.class, mode = EnumSource.Mode.EXCLUDE, names = "UNKNOWN")
     @DisplayName("ACT-02.02 EVT-ACT-01 라우팅 키는 command.status.{소문자}, 끝 상태는 domain-model §3 목록")

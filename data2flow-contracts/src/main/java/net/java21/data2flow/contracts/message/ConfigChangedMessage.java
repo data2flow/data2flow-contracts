@@ -10,7 +10,7 @@ import java.util.UUID;
  * 설정 변경 메시지 봉투 v1(architecture.md §4.5 정본, domain-map §6-6). fanout {@code data2flow.config}의 모든 메시지가 이 모양이다.
  *
  * <p>EVT-DEV-04(DEVICE·MODEL·METRIC·ALIAS·SPACE·GROUP·ATTRIBUTE), EVT-DSC-01(SOURCE·OUTPUT·CREDENTIAL), EVT-SCR-01(SCRIPT),
- * EVT-FLW-04, EVT-OPS-04, EVT-ING-08(INGEST_CACHE) 등. 받은 서비스는 내용이 아니라 {@code entityType}·{@code id}·{@code version}만 보고
+ * EVT-FLW-04, EVT-OPS-04, EVT-ING-08(INGEST_CACHE), EVT-ACT-04(CAPABILITY·DRIVER) 등. 받은 서비스는 내용이 아니라 {@code entityType}·{@code id}·{@code version}만 보고
  * 캐시를 무효화한 뒤 DB(내부 API)에서 다시 읽는다. 원천은 DB이고, 재연결하면 전체를 다시 읽어 놓친 메시지를 보완한다.
  *
  * @param v          스키마 버전(1)
@@ -65,6 +65,10 @@ public record ConfigChangedMessage(
         INGEST_CACHE,
         OCC_PUBLIC,
         SIM_SANDBOX,
+        /** 사용자 정의 기능 정의(ACT-01.04, id = 기능 이름). action은 그 기능을 쓰는 제어 프로필만 지운다 */
+        CAPABILITY,
+        /** 드라이버 설정(ACT-03.05, id = 드라이버 ID). action은 그 드라이버에 연결된 제어 프로필만 지운다 */
+        DRIVER,
         /** 이 코드보다 새 생산자가 보낸 종류. 소비자는 무시한다 */
         @JsonEnumDefaultValue
         UNKNOWN

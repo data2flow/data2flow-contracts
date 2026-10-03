@@ -16,16 +16,35 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @param bulkJobId        일괄 작업 ID(BULK)
  * @param suggestionId     AI 제안 ID(AI)
  * @param approvedBy       AI 제안을 승인한 사용자(AI, BR-ACT-15: 승인 없는 AI 명령은 실행하지 않는다)
+ * @param spaceId          출처 공간(선택). 플로우·규칙이 판단한 공간(트리거·대상 공간). action은 기기 대상 명령에서도
+ *                         이 값으로 샌드박스 판정(BR-ACT-23)을 한다. 없으면 대상({@code target.spaceId}·기기 공간)만 본다
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record CommandSource(SourceType type, Long userId, String flowId, Integer flowVersion, String nodeId,
                             String triggerMessageId, String sceneRunId, Long scheduleId, String bulkJobId,
-                            String suggestionId, Long approvedBy) {
+                            String suggestionId, Long approvedBy, Long spaceId) {
 
     public CommandSource {
         if (type == null) {
             throw new IllegalArgumentException("source.type은 필수입니다");
         }
+        if (spaceId != null && spaceId < 1) {
+            throw new IllegalArgumentException("source.spaceId는 1 이상이어야 합니다");
+        }
+    }
+
+    /** 출처 공간 없는 생성(이전 11개 인자, 하위 호환) */
+    public CommandSource(SourceType type, Long userId, String flowId, Integer flowVersion, String nodeId,
+                         String triggerMessageId, String sceneRunId, Long scheduleId, String bulkJobId,
+                         String suggestionId, Long approvedBy) {
+        this(type, userId, flowId, flowVersion, nodeId, triggerMessageId, sceneRunId, scheduleId, bulkJobId,
+                suggestionId, approvedBy, null);
+    }
+
+    /** 출처 공간을 바꾼 사본 */
+    public CommandSource withSpaceId(Long newSpaceId) {
+        return new CommandSource(type, userId, flowId, flowVersion, nodeId, triggerMessageId, sceneRunId, scheduleId,
+                bulkJobId, suggestionId, approvedBy, newSpaceId);
     }
 
     public static CommandSource user(long userId) {
@@ -35,6 +54,12 @@ public record CommandSource(SourceType type, Long userId, String flowId, Integer
     public static CommandSource flow(String flowId, int flowVersion, String nodeId, String triggerMessageId) {
         return new CommandSource(SourceType.FLOW, null, flowId, flowVersion, nodeId, triggerMessageId, null, null, null,
                 null, null);
+    }
+
+    /** 출처 공간(트리거·대상 공간)을 함께 적은 플로우 출처 */
+    public static CommandSource flow(String flowId, int flowVersion, String nodeId, String triggerMessageId,
+                                     Long spaceId) {
+        return flow(flowId, flowVersion, nodeId, triggerMessageId).withSpaceId(spaceId);
     }
 
     public static CommandSource ai(String suggestionId, long approvedBy) {

@@ -60,6 +60,15 @@ class MessageFixturesTest {
         assertThat(request.commandPayload().awaitResult()).isTrue();
     }
 
+    @Test
+    @DisplayName("SIM-07.03 BR-ACT-23 기기 대상 플로우 명령 픽스처는 출처 공간(source.spaceId)을 싣는다")
+    void flowDeviceCommandWithSourceSpace() {
+        ActionRequest request = MessageFixtures.actionRequest("flow-command-device-source-space");
+        assertThat(request.commandPayload().target().isDevice()).isTrue();
+        assertThat(request.source().spaceId()).isEqualTo(31L);
+        assertThat(MessageFixtures.actionRequest("flow-command-heatwave").source().spaceId()).isNull();
+    }
+
     @ParameterizedTest
     @FieldSource("EVENTS")
     @DisplayName("SIM-03.04 TC-SIM-036 M3 도메인 이벤트 픽스처가 domain-event.v1.json을 통과하고 다시 써도 같은 바이트다")

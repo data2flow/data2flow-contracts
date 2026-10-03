@@ -41,7 +41,7 @@ public final class MessageFixtures {
             "chirpstack-ws302-uplink", "webhook-single-value", "simulation-virtual");
 
     /** 행동 요청: 플로우 "고온이면 냉방" 제어 노드(공간 관계 대상), 사용자 기기 명령(모르는 필드 포함) */
-    public static final List<String> ACTION_REQUEST = List.of("flow-command-heatwave", "user-command-device");
+    public static final List<String> ACTION_REQUEST = List.of("flow-command-heatwave", "user-command-device", "flow-command-device-source-space");
 
     /**
      * M3 도메인 이벤트: 가상 장비 ack·상태 보고(EVT-SIM-03 = EVT-ACT-06·07, 시뮬레이터가 실제로 내는 바이트 모양), 명령 상태(EVT-ACT-01),
