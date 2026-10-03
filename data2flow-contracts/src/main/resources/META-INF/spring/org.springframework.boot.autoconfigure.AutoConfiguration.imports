@@ -1,3 +1,5 @@
 net.java21.data2flow.contracts.web.ContractsWebAutoConfiguration
 net.java21.data2flow.contracts.authz.ContractsAuthorizationAutoConfiguration
+net.java21.data2flow.contracts.idempotency.IdempotencyJdbcAutoConfiguration
+net.java21.data2flow.contracts.idempotency.IdempotencyWebAutoConfiguration
 net.java21.data2flow.contracts.secret.SecretsAutoConfiguration
