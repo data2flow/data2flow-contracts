@@ -1,0 +1,16 @@
+{
+  "name": "Lock",
+  "version": 1,
+  "standard": true,
+  "matterCluster": "DoorLock",
+  "attributes": [
+    {"name": "locked", "type": "boolean", "readOnly": false},
+    {"name": "battery", "type": "number", "unit": "%", "min": 0, "max": 100, "readOnly": true}
+  ],
+  "commands": [
+    {"name": "set", "sets": ["locked"],
+     "args": {"type": "object", "required": ["locked"], "additionalProperties": false,
+              "properties": {"locked": {"type": "boolean"}}}}
+  ],
+  "expectedEffects": []
+}

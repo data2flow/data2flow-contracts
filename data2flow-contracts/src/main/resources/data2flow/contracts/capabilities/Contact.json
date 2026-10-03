@@ -1,0 +1,11 @@
+{
+  "name": "Contact",
+  "version": 1,
+  "standard": true,
+  "matterCluster": "BooleanState",
+  "attributes": [
+    {"name": "open", "type": "boolean", "readOnly": true}
+  ],
+  "commands": [],
+  "expectedEffects": []
+}

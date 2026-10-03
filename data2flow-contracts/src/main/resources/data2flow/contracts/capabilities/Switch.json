@@ -1,0 +1,15 @@
+{
+  "name": "Switch",
+  "version": 1,
+  "standard": true,
+  "matterCluster": "OnOff",
+  "attributes": [
+    {"name": "on", "type": "boolean", "readOnly": false}
+  ],
+  "commands": [
+    {"name": "set", "sets": ["on"],
+     "args": {"type": "object", "required": ["on"], "additionalProperties": false,
+              "properties": {"on": {"type": "boolean"}}}}
+  ],
+  "expectedEffects": []
+}

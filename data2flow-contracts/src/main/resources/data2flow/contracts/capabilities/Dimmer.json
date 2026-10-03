@@ -1,0 +1,15 @@
+{
+  "name": "Dimmer",
+  "version": 1,
+  "standard": true,
+  "matterCluster": "LevelControl",
+  "attributes": [
+    {"name": "level", "type": "integer", "unit": "%", "min": 0, "max": 100, "step": 1, "readOnly": false}
+  ],
+  "commands": [
+    {"name": "set", "sets": ["level"],
+     "args": {"type": "object", "required": ["level"], "additionalProperties": false,
+              "properties": {"level": {"type": "integer", "minimum": 0, "maximum": 100}}}}
+  ],
+  "expectedEffects": []
+}

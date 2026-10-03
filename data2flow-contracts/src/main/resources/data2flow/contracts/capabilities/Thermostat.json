@@ -1,0 +1,22 @@
+{
+  "name": "Thermostat",
+  "version": 1,
+  "standard": true,
+  "matterCluster": "Thermostat",
+  "attributes": [
+    {"name": "mode", "type": "enum", "enum": ["off", "cool", "heat", "dry", "fan", "auto"], "readOnly": false},
+    {"name": "targetTemperature", "type": "number", "unit": "°C", "min": 5, "max": 35, "step": 0.5, "readOnly": false},
+    {"name": "currentTemperature", "type": "number", "unit": "°C", "readOnly": true}
+  ],
+  "commands": [
+    {"name": "set", "sets": ["mode", "targetTemperature"],
+     "args": {"type": "object", "minProperties": 1, "additionalProperties": false,
+              "properties": {
+                "mode": {"type": "string", "enum": ["off", "cool", "heat", "dry", "fan", "auto"]},
+                "targetTemperature": {"type": "number", "minimum": 5, "maximum": 35, "multipleOf": 0.5}}}}
+  ],
+  "expectedEffects": [
+    {"when": {"command": "set", "args": {"mode": "cool"}}, "metric": "temperature", "direction": "down", "withinMinutes": 15},
+    {"when": {"command": "set", "args": {"mode": "heat"}}, "metric": "temperature", "direction": "up", "withinMinutes": 15}
+  ]
+}

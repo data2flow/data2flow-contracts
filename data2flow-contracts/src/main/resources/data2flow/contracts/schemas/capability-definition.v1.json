@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://data2flow.java21.net/schemas/capability-definition.v1.json",
+  "title": "CapabilityDefinition v1 (ACT-01.01, API-ACT-25)",
+  "description": "기능 정의: 이름, 버전, 상태 속성(타입·단위·범위), 명령(인자 JSON Schema), 기대 효과. 표준 기능 원본은 classpath:data2flow/contracts/capabilities/*.json, 사용자 정의는 이름이 custom.으로 시작한다(BR-ACT-22).",
+  "type": "object",
+  "required": [
+    "name",
+    "version",
+    "standard",
+    "attributes",
+    "commands"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^([A-Z][A-Za-z0-9]*|custom\\.[A-Za-z][A-Za-z0-9]*)$"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "standard": {
+      "type": "boolean"
+    },
+    "matterCluster": {
+      "type": "string"
+    },
+    "attributes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attribute"
+      }
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/command"
+      }
+    },
+    "expectedEffects": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/expectedEffect"
+      }
+    }
+  },
+  "$defs": {
+    "attribute": {
+      "type": "object",
+      "required": [
+        "name",
+        "type"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*$"
+        },
+        "type": {
+          "enum": [
+            "boolean",
+            "number",
+            "integer",
+            "enum",
+            "string"
+          ]
+        },
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "unit": {
+          "type": "string"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "step": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "readOnly": {
+          "type": "boolean"
+        }
+      },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "enum"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "enum"
+        ]
+      }
+    },
+    "command": {
+      "type": "object",
+      "required": [
+        "name",
+        "sets",
+        "args"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "args": {
+          "type": "object",
+          "required": [
+            "type",
+            "properties"
+          ],
+          "properties": {
+            "type": {
+              "const": "object"
+            },
+            "properties": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "expectedEffect": {
+      "type": "object",
+      "required": [
+        "when",
+        "metric",
+        "direction",
+        "withinMinutes"
+      ],
+      "properties": {
+        "when": {
+          "type": "object",
+          "required": [
+            "command"
+          ],
+          "properties": {
+            "command": {
+              "type": "string"
+            },
+            "args": {
+              "type": "object"
+            }
+          }
+        },
+        "metric": {
+          "type": "string",
+          "minLength": 1
+        },
+        "direction": {
+          "enum": [
+            "up",
+            "down"
+          ]
+        },
+        "withinMinutes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

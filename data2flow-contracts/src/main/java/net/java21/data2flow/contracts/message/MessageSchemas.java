@@ -27,6 +27,14 @@ public final class MessageSchemas {
     public static final String CANONICAL_TELEMETRY = "canonical-telemetry.v1.json";
     public static final String CONFIG_CHANGED = "config-changed.v1.json";
     public static final String DOMAIN_EVENT = "domain-event.v1.json";
+    /** 행동 요청(ACT-api §5.1) */
+    public static final String ACTION_REQUEST = "action-request.v1.json";
+    /** 기능 정의(ACT-01.01, API-ACT-25). 메시지가 아니라 정의 문서의 스키마다 */
+    public static final String CAPABILITY_DEFINITION = "capability-definition.v1.json";
+    /** 플로우 정의(FLW-api §5, flows.definition) */
+    public static final String FLOW_DEFINITION = "flow-definition.v1.json";
+    /** 노드 카탈로그 항목(API-FLW-30, TC-FLW-031) */
+    public static final String FLOW_NODE_TYPE = "flow-node-type.v1.json";
 
     private static final String BASE = "/data2flow/contracts/schemas/";
     private static final SchemaRegistry REGISTRY = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12,
@@ -59,6 +67,14 @@ public final class MessageSchemas {
     public static List<String> validate(String file, JsonNode instance) {
         Schema schema = CACHE.computeIfAbsent(file, MessageSchemas::load);
         return schema.validate(instance).stream().map(Error::toString).toList();
+    }
+
+    /**
+     * 주어진 스키마(JSON 트리)로 검증한다. 기능 명령 인자 스키마({@code CapabilityCommand.args()})처럼 파일이 아닌 스키마에 쓴다.
+     * 위반 목록이 비어 있으면 통과다.
+     */
+    public static List<String> validateWithSchema(JsonNode schema, JsonNode instance) {
+        return REGISTRY.getSchema(schema).validate(instance).stream().map(Error::toString).toList();
     }
 
     /** 메시지를 직렬화한 JSON이 자기 타입의 스키마를 통과하는지 */
