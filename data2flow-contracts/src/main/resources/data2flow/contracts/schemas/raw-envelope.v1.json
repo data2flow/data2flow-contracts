@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://data2flow.java21.net/schemas/raw-envelope.v1.json",
+  "title": "RawEnvelope v1 (EVT-ING-01, data2flow.raw)",
+  "description": "원본 수신 메시지. 소비자는 모르는 필드를 무시한다.",
+  "type": "object",
+  "required": ["v", "messageId", "organizationId", "sourceId", "sourceType", "payload", "receivedAt", "ingressInstance", "dedupKey", "virtual"],
+  "properties": {
+    "v": { "const": 1 },
+    "messageId": { "type": "string", "format": "uuid" },
+    "organizationId": { "type": "integer", "minimum": 1 },
+    "sourceId": { "type": "integer", "minimum": 1 },
+    "sourceType": { "type": "string", "minLength": 1, "maxLength": 20 },
+    "topic": { "type": ["string", "null"], "maxLength": 512 },
+    "payload": { "type": "string", "contentEncoding": "base64" },
+    "receivedAt": { "type": "string", "format": "date-time" },
+    "ingressInstance": { "type": "string", "minLength": 1 },
+    "dedupKey": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "virtual": { "type": "boolean" },
+    "simRunId": { "type": ["integer", "null"], "minimum": 1 }
+  }
+}

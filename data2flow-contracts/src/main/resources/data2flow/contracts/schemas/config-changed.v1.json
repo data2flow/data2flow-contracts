@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://data2flow.java21.net/schemas/config-changed.v1.json",
+  "title": "ConfigChangedMessage v1 (data2flow.config, architecture.md §4.5)",
+  "description": "설정 변경 봉투. 받은 서비스는 entityType·id·version만 보고 DB에서 다시 읽는다. 새 entityType은 모르는 소비자가 무시한다.",
+  "type": "object",
+  "required": ["v", "messageId", "entityType", "id", "version", "op", "orgId", "at"],
+  "properties": {
+    "v": { "const": 1 },
+    "messageId": { "type": "string", "format": "uuid" },
+    "entityType": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+    "id": { "type": "string", "minLength": 1 },
+    "version": { "type": "integer", "minimum": 0 },
+    "op": { "enum": ["UPSERT", "DELETE"] },
+    "orgId": { "type": "string", "minLength": 1 },
+    "at": { "type": "string", "format": "date-time" }
+  }
+}

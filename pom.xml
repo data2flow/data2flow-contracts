@@ -25,6 +25,8 @@
         <spring-boot.version>4.1.1</spring-boot.version>
         <!-- ArchUnit(Apache-2.0): BOM과 data2flow-contracts-test가 함께 쓴다 -->
         <archunit.version>1.5.1</archunit.version>
+        <!-- networknt json-schema-validator(Apache-2.0, Jackson 3): 메시지 계약 JSON Schema 검증. BOM·contracts·contracts-test가 함께 쓴다 -->
+        <json-schema-validator.version>3.0.6</json-schema-validator.version>
     </properties>
 
     <distributionManagement>

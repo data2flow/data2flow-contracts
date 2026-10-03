@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://data2flow.java21.net/schemas/canonical-telemetry.v1.json",
+  "title": "CanonicalTelemetry v1 (EVT-ING-02, data2flow.telemetry)",
+  "description": "표준 텔레메트리. 모든 디코더 출력이 저장·발행 전에 이 모양이 된다(TC-ING-033). 소비자는 모르는 필드를 무시한다(TC-ING-065).",
+  "type": "object",
+  "required": ["v", "messageId", "organizationId", "sourceId", "externalId", "deviceId", "deviceStatus", "measuredAt", "receivedAt", "late", "virtual", "metrics", "rawMessageId"],
+  "properties": {
+    "v": { "const": 1 },
+    "messageId": { "type": "string", "format": "uuid" },
+    "organizationId": { "type": "integer", "minimum": 1 },
+    "sourceId": { "type": "integer", "minimum": 1 },
+    "externalId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "deviceId": { "type": "integer", "minimum": 1 },
+    "deviceStatus": { "enum": ["PENDING", "ACTIVE", "INACTIVE"] },
+    "modelId": { "type": ["string", "null"] },
+    "spaceId": { "type": ["integer", "null"], "minimum": 1 },
+    "measuredAt": { "type": "string", "format": "date-time" },
+    "receivedAt": { "type": "string", "format": "date-time" },
+    "late": { "type": "boolean" },
+    "virtual": { "type": "boolean" },
+    "metrics": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/metric" }
+    },
+    "link": {
+      "type": ["object", "null"],
+      "properties": {
+        "rssi": { "type": ["number", "null"] },
+        "snr": { "type": ["number", "null"] },
+        "frameCounter": { "type": ["integer", "null"], "minimum": 0 },
+        "gateways": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "required": ["eui"],
+            "properties": {
+              "eui": { "type": "string", "minLength": 1 },
+              "rssi": { "type": ["number", "null"] },
+              "snr": { "type": ["number", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "meta": {
+      "type": ["object", "null"],
+      "properties": {
+        "tags": { "type": "object", "additionalProperties": { "type": "string" } },
+        "decoder": {
+          "type": "object",
+          "required": ["key"],
+          "properties": { "key": { "type": "string" }, "version": { "type": ["string", "null"] } }
+        },
+        "scripts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "version"],
+            "properties": { "id": { "type": "integer", "minimum": 1 }, "version": { "type": "integer", "minimum": 1 } }
+          }
+        }
+      }
+    },
+    "rawMessageId": { "type": "integer", "minimum": 1 }
+  },
+  "$defs": {
+    "metric": {
+      "type": "object",
+      "required": ["key", "value", "quality"],
+      "properties": {
+        "key": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "value": { "type": "number" },
+        "unit": { "type": ["string", "null"], "maxLength": 16 },
+        "quality": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "derived": { "type": ["boolean", "null"] }
+      }
+    }
+  }
+}

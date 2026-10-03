@@ -1,0 +1,1060 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://data2flow.java21.net/schemas/domain-event.v1.json",
+  "title": "DomainEvent v1 (data2flow.events, architecture.md §4.5)",
+  "description": "도메인 이벤트 봉투. type은 발행 라우팅 키이고 payload 모양은 type이 정한다(x-payloadTypes). 아래 목록에 없는 type은 봉투만 검사한다.",
+  "type": "object",
+  "required": [
+    "v",
+    "messageId",
+    "type",
+    "organizationId",
+    "occurredAt",
+    "payload"
+  ],
+  "properties": {
+    "v": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "messageId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "type": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+    },
+    "organizationId": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requestId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "x-payloadTypes": {
+    "device.changed": "deviceChanged",
+    "device.connectivity.changed": "deviceConnectivityChanged",
+    "device.pending.created": "devicePendingCreated",
+    "space.changed": "spaceChanged",
+    "group.membership.changed": "groupMembershipChanged",
+    "source.runtime.reported": "sourceRuntimeReported",
+    "source.stats.1m": "sourceStatsReported",
+    "source.connection.changed": "sourceConnectionChanged",
+    "source.no-data": "sourceDataActivity",
+    "source.data-resumed": "sourceDataActivity",
+    "connector.catalog.reported": "connectorCatalogReported",
+    "metric.unverified.registered": "metricUnverifiedRegistered",
+    "ingest.alert.raised": "ingestAlert",
+    "ingest.alert.cleared": "ingestAlert",
+    "ingest.gap.detected": "ingestGapDetected",
+    "ingest.clock-skew.suspected": "clockSkewSuspected",
+    "aggregates.recomputed": "aggregatesRecomputed",
+    "partition.warning": "partitionWarning"
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "device.changed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/deviceChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "device.connectivity.changed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/deviceConnectivityChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "device.pending.created"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/devicePendingCreated"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "space.changed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/spaceChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "group.membership.changed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/groupMembershipChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "source.runtime.reported"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/sourceRuntimeReported"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "source.stats.1m"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/sourceStatsReported"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "source.connection.changed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/sourceConnectionChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "source.no-data"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/sourceDataActivity"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "source.data-resumed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/sourceDataActivity"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "connector.catalog.reported"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/connectorCatalogReported"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "metric.unverified.registered"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/metricUnverifiedRegistered"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "ingest.alert.raised"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/ingestAlert"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "ingest.alert.cleared"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/ingestAlert"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "ingest.gap.detected"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/ingestGapDetected"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "ingest.clock-skew.suspected"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/clockSkewSuspected"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "aggregates.recomputed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/aggregatesRecomputed"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "partition.warning"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/partitionWarning"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "deviceChanged": {
+      "type": "object",
+      "required": [
+        "deviceId",
+        "change",
+        "version"
+      ],
+      "properties": {
+        "deviceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "change": {
+          "enum": [
+            "CREATED",
+            "APPROVED",
+            "UPDATED",
+            "ACTIVATED",
+            "DEACTIVATED",
+            "DELETED",
+            "REPLACED"
+          ]
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "modelId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "spaceId": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "deviceConnectivityChanged": {
+      "type": "object",
+      "required": [
+        "deviceId",
+        "to",
+        "lastSeenAt",
+        "expectedIntervalSec",
+        "multiplier"
+      ],
+      "properties": {
+        "deviceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "from": {
+          "enum": [
+            "ONLINE",
+            "OFFLINE",
+            null
+          ]
+        },
+        "to": {
+          "enum": [
+            "ONLINE",
+            "OFFLINE"
+          ]
+        },
+        "lastSeenAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expectedIntervalSec": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "multiplier": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "devicePendingCreated": {
+      "type": "object",
+      "required": [
+        "deviceId",
+        "sourceId",
+        "externalId",
+        "firstSeenAt"
+      ],
+      "properties": {
+        "deviceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sourceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "externalId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "firstSeenAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "spaceChanged": {
+      "type": "object",
+      "required": [
+        "spaceId",
+        "change"
+      ],
+      "properties": {
+        "spaceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "change": {
+          "type": "string"
+        },
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "groupMembershipChanged": {
+      "type": "object",
+      "required": [
+        "groupId",
+        "added",
+        "removed"
+      ],
+      "properties": {
+        "groupId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "added": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "removed": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "sourceRuntimeReported": {
+      "type": "object",
+      "required": [
+        "sourceId",
+        "instanceId",
+        "state",
+        "reconnects24h"
+      ],
+      "properties": {
+        "sourceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "enum": [
+            "CONNECTED",
+            "CONNECTING",
+            "DISCONNECTED",
+            "ERROR",
+            "DISABLED"
+          ]
+        },
+        "errorKind": {
+          "enum": [
+            "AUTH",
+            "DNS",
+            "TLS",
+            "TIMEOUT",
+            "REFUSED",
+            "PROTOCOL",
+            "QUOTA",
+            "OTHER",
+            null
+          ]
+        },
+        "errorMessage": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 500
+        },
+        "clientId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128
+        },
+        "connectedSince": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "reconnects24h": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "sourceStatsReported": {
+      "type": "object",
+      "required": [
+        "sourceId",
+        "minute",
+        "producer",
+        "counters"
+      ],
+      "properties": {
+        "sourceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minute": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "producer": {
+          "enum": [
+            "INGRESS",
+            "PIPELINE"
+          ]
+        },
+        "counters": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "sourceConnectionChanged": {
+      "type": "object",
+      "required": [
+        "sourceId",
+        "to",
+        "at"
+      ],
+      "properties": {
+        "sourceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "from": {
+          "enum": [
+            "CONNECTED",
+            "CONNECTING",
+            "DISCONNECTED",
+            "ERROR",
+            "DISABLED",
+            null
+          ]
+        },
+        "to": {
+          "enum": [
+            "CONNECTED",
+            "CONNECTING",
+            "DISCONNECTED",
+            "ERROR",
+            "DISABLED"
+          ]
+        },
+        "errorKind": {
+          "enum": [
+            "AUTH",
+            "DNS",
+            "TLS",
+            "TIMEOUT",
+            "REFUSED",
+            "PROTOCOL",
+            "QUOTA",
+            "OTHER",
+            null
+          ]
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "sourceDataActivity": {
+      "type": "object",
+      "required": [
+        "sourceId",
+        "thresholdSec"
+      ],
+      "properties": {
+        "sourceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "lastReceivedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "thresholdSec": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "connectorCatalogReported": {
+      "type": "object",
+      "required": [
+        "instanceId",
+        "connectors"
+      ],
+      "properties": {
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "connectors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "key",
+              "version",
+              "category",
+              "schema",
+              "authMethods",
+              "payloadFormats",
+              "ackMode",
+              "scaling",
+              "supportsSend"
+            ],
+            "properties": {
+              "key": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,39}$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              },
+              "schema": {
+                "type": "object"
+              },
+              "authMethods": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "payloadFormats": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "ackMode": {
+                "enum": [
+                  "AFTER_WRITE",
+                  "AUTO",
+                  "CURSOR",
+                  "NONE"
+                ]
+              },
+              "scaling": {
+                "enum": [
+                  "SCALABLE",
+                  "DUAL_ACTIVE",
+                  "SINGLETON"
+                ]
+              },
+              "supportsSend": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "metricUnverifiedRegistered": {
+      "type": "object",
+      "required": [
+        "metricKey",
+        "firstDeviceId",
+        "firstSeenAt"
+      ],
+      "properties": {
+        "metricKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "firstDeviceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "firstSeenAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ingestAlert": {
+      "type": "object",
+      "required": [
+        "code",
+        "level",
+        "value",
+        "threshold",
+        "at"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "level": {
+          "enum": [
+            "WARNING",
+            "CRITICAL"
+          ]
+        },
+        "sourceId": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "value": {
+          "type": "number"
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "causeHints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "scriptId": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "versionNo": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "errorRate": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "window": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "autoDisabled": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
+    "ingestGapDetected": {
+      "type": "object",
+      "required": [
+        "deviceId",
+        "from",
+        "to",
+        "estimatedMissing"
+      ],
+      "properties": {
+        "deviceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "estimatedMissing": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "clockSkewSuspected": {
+      "type": "object",
+      "required": [
+        "deviceId",
+        "avgSkewSec",
+        "since"
+      ],
+      "properties": {
+        "deviceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "avgSkewSec": {
+          "type": "number"
+        },
+        "since": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "aggregatesRecomputed": {
+      "type": "object",
+      "required": [
+        "level",
+        "items"
+      ],
+      "properties": {
+        "level": {
+          "enum": [
+            "1m",
+            "1h",
+            "1d"
+          ]
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "deviceId",
+              "metricKey",
+              "from",
+              "to"
+            ],
+            "properties": {
+              "deviceId": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "metricKey": {
+                "type": "string"
+              },
+              "from": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "to": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      }
+    },
+    "partitionWarning": {
+      "type": "object",
+      "required": [
+        "table",
+        "reason"
+      ],
+      "properties": {
+        "table": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string"
+        },
+        "detail": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

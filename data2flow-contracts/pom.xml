@@ -12,7 +12,7 @@
 
     <artifactId>data2flow-contracts</artifactId>
     <name>data2flow-contracts</name>
-    <description>공통 응답(ApiResponse·ListApiResponse), 오류 코드와 예외 처리, 4개 언어 오류 문구, 신원·요청 헤더와 신원 필터, 권한표·RoleChecker, 감사 기록, Idempotency-Key, baseVersion, 호출 한도 응답, 비밀값 암호화·마스킹, 메시지 이름 상수</description>
+    <description>공통 응답(ApiResponse·ListApiResponse), 오류 코드와 예외 처리, 4개 언어 오류 문구, 신원·요청 헤더와 신원 필터, 권한표·RoleChecker, 감사 기록, Idempotency-Key, baseVersion, 호출 한도 응답, 비밀값 암호화·마스킹, 메시지 계약(RawEnvelope·CanonicalTelemetry·ConfigChangedMessage·DomainEvent)과 MessageCodec, 디코더·커넥터 SPI, RabbitMQ 이름·라우팅 키·소비자 그룹, 메시지 추적 전파</description>
 
     <dependencyManagement>
         <dependencies>
@@ -27,6 +27,24 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- 메시지 계약 직렬화(MessageCodec). 모든 서비스(gateway 포함)가 Jackson 3을 이미 쓴다 -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <!-- 메시지 추적 전파(MessageTracing, OPS-02.03). 추적을 켠 서비스에만 있으면 된다(Apache-2.0) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- MessageSchemas(JSON Schema 검증). 계약 테스트에서만 쓰므로 선택 의존성이다. 테스트 키트(data2flow-contracts-test)가 가져온다(Apache-2.0) -->
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${json-schema-validator.version}</version>
+            <optional>true</optional>
+        </dependency>
         <!-- 서블릿 서비스에서만 켜지는 자동 구성. 리액티브 gateway는 상수·오류 코드만 쓰므로 웹 의존성을 강제하지 않는다 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -69,6 +87,33 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- 추적 전파 테스트: Micrometer OTel 브리지 + OTel SDK(Apache-2.0) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk-testing</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- *IT: 실제 RabbitMQ 3.13 Super Stream(RabbitMQ Stream Java Client, Apache-2.0/MPL-2.0) -->
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>stream-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
