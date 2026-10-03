@@ -9,8 +9,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.FieldSource;
+import tools.jackson.databind.JsonNode;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,5 +81,42 @@ class MessageFixturesTest {
         assertThat(DedupKeys.detect(raw.sourceId(), raw.topic(), raw.payload())).isEqualTo(raw.dedupKey());
         assertThat(MessageFixtures.rawEnvelope("simulation-virtual").virtual()).isTrue();
         assertThatThrownBy(() -> MessageFixtures.rawEnvelope("nope")).isInstanceOf(IllegalArgumentException.class);
+    }
+    @Test
+    @DisplayName("ING-02.01 TC-ING-033 WS302 원본 픽스처의 data 바이트를 Milesight 공식 순서(LAI·LAImax·LAeq)로 풀면 object 값과 같다")
+    void ws302BytesMatchDecodedObject() {
+        JsonNode uplink = codec.mapper().readTree(MessageFixtures.chirpStackUplinkPayload());
+        Map<String, Double> decoded = decodeWs302(Base64.getDecoder().decode(uplink.get("data").asString()));
+        JsonNode object = uplink.get("object");
+        assertThat(decoded).containsOnlyKeys("battery", "LAI", "LAImax", "LAeq");
+        decoded.forEach((key, value) -> assertThat(object.get(key).asDouble()).as(key).isEqualTo(value));
+        assertThat(uplink.path("deviceInfo").path("deviceProfileName").asString()).isEqualTo("WS302");
+    }
+
+    /** Milesight WS302 공식 디코더의 바이트 순서: 01 75 배터리(1B), 05 5B 가중치(1B)+LAI·LAImax·LAeq(각 uint16 LE /10) */
+    private static Map<String, Double> decodeWs302(byte[] bytes) {
+        Map<String, Double> out = new LinkedHashMap<>();
+        int i = 0;
+        while (i + 1 < bytes.length) {
+            int channel = bytes[i] & 0xff;
+            int type = bytes[i + 1] & 0xff;
+            i += 2;
+            if (channel == 0x01 && type == 0x75) {
+                out.put("battery", (double) (bytes[i] & 0xff));
+                i += 1;
+            } else if (channel == 0x05 && type == 0x5b) {
+                out.put("LAI", u16(bytes, i + 1) / 10.0);
+                out.put("LAImax", u16(bytes, i + 3) / 10.0);
+                out.put("LAeq", u16(bytes, i + 5) / 10.0);
+                i += 7;
+            } else {
+                throw new IllegalStateException("모르는 채널 " + channel + "/" + type);
+            }
+        }
+        return out;
+    }
+
+    private static int u16(byte[] b, int i) {
+        return (b[i] & 0xff) | (b[i + 1] & 0xff) << 8;
     }
 }

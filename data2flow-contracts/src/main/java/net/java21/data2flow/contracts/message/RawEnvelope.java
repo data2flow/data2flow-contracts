@@ -25,6 +25,9 @@ import java.util.UUID;
  * @param dedupKey        중복 판정 키(BR-ING-07, {@link net.java21.data2flow.contracts.messaging.DedupKeys}), 128자 이하
  * @param virtual         가상 환경 메시지(SIM)이면 true
  * @param simRunId        가상 실행 ID(SIM). 없으면 null
+ * @param signatureStatus 플랫폼 브로커 기기 payload 서명 검증 결과({@link SignatureStatus}: VERIFIED·UNSIGNED·INVALID,
+ *                        DSC-03.03·03.05, ADR-042). ingress가 PLATFORM_BROKER 소스에만 채우고, 그 밖에는 null(JSON에서 생략).
+ *                        선택 필드라 v는 1 그대로이고, 이 필드를 모르는 소비자는 무시한다
  */
 @MessageSchema(name = "raw-envelope", version = 1)
 public record RawEnvelope(
@@ -39,7 +42,8 @@ public record RawEnvelope(
         String ingressInstance,
         String dedupKey,
         boolean virtual,
-        Long simRunId) implements Message {
+        Long simRunId,
+        String signatureStatus) implements Message {
 
     public static final int VERSION = 1;
     public static final int MAX_DEDUP_KEY_LENGTH = 128;
@@ -59,6 +63,13 @@ public record RawEnvelope(
         }
     }
 
+    /** 서명 결과가 없는 원본 봉투(기존 12개 필드 생성자, 하위 호환) */
+    public RawEnvelope(int v, UUID messageId, long organizationId, long sourceId, String sourceType, String topic, byte[] payload,
+                       Instant receivedAt, String ingressInstance, String dedupKey, boolean virtual, Long simRunId) {
+        this(v, messageId, organizationId, sourceId, sourceType, topic, payload, receivedAt, ingressInstance, dedupKey, virtual,
+                simRunId, null);
+    }
+
     /** 현재 버전으로 새 원본 봉투를 만든다(messageId는 새 UUID) */
     public static RawEnvelope of(long organizationId, long sourceId, String sourceType, String topic, byte[] payload,
                                  Instant receivedAt, String ingressInstance, String dedupKey) {
@@ -69,7 +80,18 @@ public record RawEnvelope(
     /** 가상 환경(SIM) 표시를 붙인 사본 */
     public RawEnvelope asVirtual(Long runId) {
         return new RawEnvelope(v, messageId, organizationId, sourceId, sourceType, topic, payload, receivedAt,
-                ingressInstance, dedupKey, true, runId);
+                ingressInstance, dedupKey, true, runId, signatureStatus);
+    }
+
+    /**
+     * 서명 검증 결과를 붙인 사본(ingress, DSC-03.03). 서명을 떼어 낸 본문으로 바꿀 때는 {@code payload}도 함께 준다.
+     *
+     * @param status  {@link SignatureStatus} 값
+     * @param payload 기록할 바이트(서명 접두사를 뗀 본문 또는 받은 그대로)
+     */
+    public RawEnvelope withSignature(String status, byte[] payload) {
+        return new RawEnvelope(v, messageId, organizationId, sourceId, sourceType, topic, payload, receivedAt,
+                ingressInstance, dedupKey, virtual, simRunId, status);
     }
 
     /** {@code data2flow.raw} 파티션 라우팅 키 */
@@ -85,7 +107,7 @@ public record RawEnvelope(
                 && sourceType.equals(other.sourceType) && Objects.equals(topic, other.topic)
                 && Arrays.equals(payload, other.payload) && receivedAt.equals(other.receivedAt)
                 && ingressInstance.equals(other.ingressInstance) && dedupKey.equals(other.dedupKey)
-                && Objects.equals(simRunId, other.simRunId);
+                && Objects.equals(simRunId, other.simRunId) && Objects.equals(signatureStatus, other.signatureStatus);
     }
 
     @Override
@@ -100,6 +122,6 @@ public record RawEnvelope(
                 + ", sourceId=" + sourceId + ", sourceType=" + sourceType + ", topic=" + topic
                 + ", payload=" + payload.length + " bytes, receivedAt=" + receivedAt
                 + ", ingressInstance=" + ingressInstance + ", dedupKey=" + dedupKey
-                + ", virtual=" + virtual + ", simRunId=" + simRunId + "]";
+                + ", virtual=" + virtual + ", simRunId=" + simRunId + ", signatureStatus=" + signatureStatus + "]";
     }
 }

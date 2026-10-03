@@ -17,6 +17,7 @@
     "ingressInstance": { "type": "string", "minLength": 1 },
     "dedupKey": { "type": "string", "minLength": 1, "maxLength": 128 },
     "virtual": { "type": "boolean" },
-    "simRunId": { "type": ["integer", "null"], "minimum": 1 }
+    "simRunId": { "type": ["integer", "null"], "minimum": 1 },
+    "signatureStatus": { "type": ["string", "null"], "enum": ["VERIFIED", "UNSIGNED", "INVALID", null], "description": "플랫폼 브로커 기기 payload 서명 검증 결과(DSC-03.03·03.05). PLATFORM_BROKER 소스만, 그 밖에는 생략" }
   }
 }
