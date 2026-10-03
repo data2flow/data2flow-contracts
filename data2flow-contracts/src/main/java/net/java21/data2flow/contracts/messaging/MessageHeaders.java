@@ -1,6 +1,7 @@
 package net.java21.data2flow.contracts.messaging;
 
 import net.java21.data2flow.contracts.identity.DataflowHeaders;
+import net.java21.data2flow.contracts.message.ActionRequest;
 import net.java21.data2flow.contracts.message.CanonicalTelemetry;
 import net.java21.data2flow.contracts.message.ConfigChangedMessage;
 import net.java21.data2flow.contracts.message.DomainEvent;
@@ -43,6 +44,7 @@ public final class MessageHeaders {
             case RawEnvelope raw -> headers.put(ORGANIZATION_ID, Long.toString(raw.organizationId()));
             case CanonicalTelemetry t -> headers.put(ORGANIZATION_ID, Long.toString(t.organizationId()));
             case ConfigChangedMessage c -> headers.put(ORGANIZATION_ID, c.orgId());
+            case ActionRequest a -> headers.put(ORGANIZATION_ID, Long.toString(a.organizationId()));
             case DomainEvent<?> e -> {
                 headers.put(SCHEMA, e.type());
                 headers.put(ORGANIZATION_ID, Long.toString(e.organizationId()));

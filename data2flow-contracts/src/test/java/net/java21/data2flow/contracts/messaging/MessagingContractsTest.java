@@ -102,4 +102,31 @@ class MessagingContractsTest {
         assertThat(MessagingNames.EXCHANGE_DLX).isEqualTo("data2flow.dlx");
         assertThat(MessagingNames.DELIVERY_LIMIT).isEqualTo(5);
     }
+
+    @org.junit.jupiter.api.Test
+    @DisplayName("ACT-02.01 ADR-020 명령·알림·Sink Quorum 큐: data2flow.actions 바인딩, delivery-limit 5, DLX data2flow.dlx → {queue}.dlq")
+    void quorumQueues() {
+        QuorumQueueSpec commands = QuorumQueueSpec.ACTION_COMMANDS;
+        assertThat(commands.name()).isEqualTo("action.commands");
+        assertThat(commands.exchange()).isEqualTo("data2flow.actions");
+        assertThat(commands.routingKey()).isEqualTo("command");
+        assertThat(commands.prefetch()).isEqualTo(20);
+        assertThat(commands.deadLetterQueue()).isEqualTo("action.commands.dlq");
+        assertThat(commands.arguments()).containsEntry("x-queue-type", "quorum").containsEntry("x-delivery-limit", 5)
+                .containsEntry("x-dead-letter-exchange", "data2flow.dlx")
+                .containsEntry("x-dead-letter-routing-key", "action.commands");
+        assertThat(QuorumQueueSpec.ACTION_NOTIFICATIONS.routingKey()).isEqualTo(MessagingNames.ROUTING_KEY_NOTIFY);
+        assertThat(QuorumQueueSpec.ACTION_NOTIFICATIONS.name()).isEqualTo("action.notifications");
+        assertThat(QuorumQueueSpec.ACTION_SINKS.routingKey()).isEqualTo("sink");
+        assertThat(QuorumQueueSpec.ACTION_SINKS.name()).isEqualTo("action.sinks");
+        QuorumQueueSpec events = QuorumQueueSpec.events("action");
+        assertThat(events.name()).isEqualTo("action.events");
+        assertThat(events.exchange()).isEqualTo("data2flow.events");
+        assertThat(events.routingKey()).isNull();
+        assertThat(events.deadLetterQueue()).isEqualTo("action.events.dlq");
+        assertThat(QuorumQueueSpec.deadLetterArguments()).containsEntry("x-queue-type", "quorum").hasSize(1);
+        assertThatThrownBy(() -> new QuorumQueueSpec(" ", "x", null, 5, 1)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new QuorumQueueSpec("q", "x", null, 0, 1)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new QuorumQueueSpec("q", "x", null, 5, 0)).isInstanceOf(IllegalArgumentException.class);
+    }
 }

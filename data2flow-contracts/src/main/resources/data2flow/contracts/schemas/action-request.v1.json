@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://data2flow.java21.net/schemas/action-request.v1.json",
+  "title": "ActionRequest v1 (ACT-api §5.1, EVT-FLW-05, data2flow.actions)",
+  "description": "행동 요청. kind가 라우팅 키를 정한다(COMMAND·SCENE→command, NOTIFY→notify, SINK→sink). 같은 idempotencyKey는 한 번만 실행된다(BR-ACT-02). 소비자는 모르는 필드를 무시한다.",
+  "type": "object",
+  "required": [
+    "v",
+    "messageId",
+    "idempotencyKey",
+    "kind",
+    "organizationId",
+    "createdAt",
+    "source",
+    "priority",
+    "payload"
+  ],
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "messageId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "kind": {
+      "enum": [
+        "COMMAND",
+        "SCENE",
+        "NOTIFY",
+        "SINK"
+      ]
+    },
+    "organizationId": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "$ref": "#/$defs/commandSource"
+    },
+    "priority": {
+      "enum": [
+        "MANUAL",
+        "SAFETY",
+        "SCHEDULE",
+        "AUTO",
+        "AI"
+      ]
+    },
+    "validUntil": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "COMMAND"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/commandPayload"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "commandSource": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "USER",
+            "FLOW",
+            "RULE",
+            "AI",
+            "SCHEDULE",
+            "SCENE",
+            "BULK",
+            "SYSTEM"
+          ]
+        },
+        "userId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "flowId": {
+          "type": "string"
+        },
+        "flowVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "nodeId": {
+          "type": "string"
+        },
+        "triggerMessageId": {
+          "type": "string"
+        },
+        "sceneRunId": {
+          "type": "string"
+        },
+        "scheduleId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bulkJobId": {
+          "type": "string"
+        },
+        "suggestionId": {
+          "type": "string"
+        },
+        "approvedBy": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "commandTarget": {
+      "type": "object",
+      "oneOf": [
+        {
+          "required": [
+            "deviceId"
+          ]
+        },
+        {
+          "required": [
+            "spaceId",
+            "relation"
+          ]
+        }
+      ],
+      "properties": {
+        "deviceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "spaceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "relation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capability": {
+          "type": "string"
+        },
+        "includeChildren": {
+          "type": "boolean"
+        }
+      }
+    },
+    "commandPayload": {
+      "type": "object",
+      "required": [
+        "target",
+        "capability",
+        "command",
+        "args"
+      ],
+      "properties": {
+        "target": {
+          "$ref": "#/$defs/commandTarget"
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "args": {
+          "type": "object"
+        },
+        "awaitResult": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

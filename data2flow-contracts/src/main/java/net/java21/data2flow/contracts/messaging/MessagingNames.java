@@ -2,7 +2,7 @@ package net.java21.data2flow.contracts.messaging;
 
 /**
  * RabbitMQ 이름(design/architecture.md §4, ADR-020·030). vhost는 환경마다 다르고(data2flow·data2flow-stg·data2flow-dev) 그 안의 이름은 같다.
- * 스트림 정의는 {@link SuperStreamSpec}, 소비자 그룹은 {@link ConsumerGroups}, 라우팅 키는 {@link StreamRoutingKeys}와
+ * 스트림 정의는 {@link SuperStreamSpec}, Quorum 큐 정의는 {@link QuorumQueueSpec}, 소비자 그룹은 {@link ConsumerGroups}, 라우팅 키는 {@link StreamRoutingKeys}와
  * {@link net.java21.data2flow.contracts.message.EventType}, 메시지 헤더는 {@link MessageHeaders}.
  */
 public final class MessagingNames {
@@ -41,6 +41,12 @@ public final class MessagingNames {
     public static final String QUEUE_ACTION_SINKS = "action.sinks";
     /** Quorum Queue 실패 한도(3.13은 기본 무제한이라 정책으로 반드시 명시, architecture.md §4.4) */
     public static final int DELIVERY_LIMIT = 5;
+    /** {@code data2flow.actions} 라우팅 키: 제어 명령·장면 → {@value #QUEUE_ACTION_COMMANDS} */
+    public static final String ROUTING_KEY_COMMAND = "command";
+    /** {@code data2flow.actions} 라우팅 키: 알림 → {@value #QUEUE_ACTION_NOTIFICATIONS} */
+    public static final String ROUTING_KEY_NOTIFY = "notify";
+    /** {@code data2flow.actions} 라우팅 키: Sink → {@value #QUEUE_ACTION_SINKS} */
+    public static final String ROUTING_KEY_SINK = "sink";
 
     /** 메시지 본문 공통 필드 */
     public static final String FIELD_MESSAGE_ID = "messageId";

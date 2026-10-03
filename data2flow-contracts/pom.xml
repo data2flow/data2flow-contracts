@@ -111,6 +111,12 @@
             <artifactId>stream-client</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- *IT: 실제 RabbitMQ 3.13 Quorum Queue·DLX(RabbitMQ Java Client, Apache-2.0/MPL-2.0 이중 라이선스, 버전은 Spring Boot BOM) -->
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
