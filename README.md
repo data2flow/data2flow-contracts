@@ -1,6 +1,6 @@
 # data2flow-contracts
 
-data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비스를 만드는 백엔드 개발자가 읽습니다. 다 읽으면 서비스에 의존성을 넣고, 신원 필터·권한 검사(RoleChecker)·감사 기록·`Idempotency-Key`·`baseVersion`·호출 한도 응답·비밀값 암호화와 가림·ArchUnit 규칙을 연결할 수 있습니다.
+data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비스를 만드는 백엔드 개발자가 읽습니다. 다 읽으면 서비스에 의존성을 넣고, 신원 필터·권한 검사(RoleChecker)·감사 기록·`Idempotency-Key`·`baseVersion`·호출 한도 응답·비밀값 암호화와 가림·ArchUnit 규칙을 연결하고, 수집 경로(M2)의 메시지 계약·디코더 SPI·커넥터 SPI와 계약 테스트 키트·메시지 추적 전파를 쓸 수 있습니다.
 
 규칙의 정본은 `data2flow-docs`의 `design/api-rules.md`(ADR-035), `design/auth.md` §7, `design/conventions.md` §3, `design/testing/backend.md` §6입니다. 이 문서는 그 규칙을 코드에서 어떻게 쓰는지만 설명합니다.
 
@@ -9,8 +9,8 @@ data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비�
 | 모듈 | 서비스에서 쓰는 범위 | 내용 |
 |---|---|---|
 | `data2flow-bom` | `import` | 공통 의존성 버전 목록. 서비스는 이 BOM을 import하고 버전 없이 이름만 씁니다 |
-| `data2flow-contracts` | `compile` | 공통 응답·오류·4개 언어 문구, 신원 헤더와 신원 필터, 권한표와 `RoleChecker`, 감사 기록 모양, `Idempotency-Key`, `baseVersion`, 목록 파라미터, 호출 한도 응답, 비밀값 암호화·가림, RabbitMQ 이름 상수 |
-| `data2flow-contracts-test` | `test` | 테스트 키트: 공통 ArchUnit 규칙(조직 조건 강제, `Thread.sleep` 금지, 시스템 시계 직접 호출 금지) |
+| `data2flow-contracts` | `compile` | 공통 응답·오류·4개 언어 문구, 신원 헤더와 신원 필터, 권한표와 `RoleChecker`, 감사 기록 모양, `Idempotency-Key`, `baseVersion`, 목록 파라미터, 호출 한도 응답, 비밀값 암호화·가림, RabbitMQ 이름·라우팅 키·소비자 그룹, 메시지 계약(`RawEnvelope`·`CanonicalTelemetry`·`ConfigChangedMessage`·`DomainEvent`)과 JSON Schema, 디코더·커넥터 SPI, 메시지 추적 전파 |
+| `data2flow-contracts-test` | `test` | 테스트 키트: 공통 ArchUnit 규칙(조직 조건 강제, `Thread.sleep` 금지, 시스템 시계 직접 호출 금지), 커넥터 계약 테스트 키트, 공유 메시지 픽스처 |
 
 패키지(`net.java21.data2flow.contracts.*`)와 스펙의 대응은 아래와 같습니다.
 
@@ -26,11 +26,16 @@ data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비�
 | `ratelimit` | OPS-12.05 | `RateLimitInfo`, `RateLimitRejection`, `RateLimitHeaders` |
 | `secret` | NFR-03.02 | `Secret`, `SecretCipher`, `SecretKeyRing`, `SecretMasker`, `SecretMaskingJsonMembersCustomizer`, `SecretMaskingMessageConverter` |
 | `error` | OPS-12.01 | `ErrorCode`, `CommonErrorCode`(공통 코드 19개), `BusinessException` |
+| `message` | ING-01.01·02.01·05.01 | `Message`, `@MessageSchema`, `MessageCodec`, `MessageSchemas`, `RawEnvelope`, `CanonicalTelemetry`, `ConfigChangedMessage`, `DomainEvent`, `EventType`, `SourceTypes`, `Quality` |
+| `message.event` | EVT-DEV·DSC·ING·TSD(M2) | `DeviceChanged`, `DeviceConnectivityChanged`, `DevicePendingCreated`, `SpaceChanged`, `GroupMembershipChanged`, `SourceRuntimeReported`, `SourceStatsReported`, `SourceConnectionChanged`, `SourceDataActivity`, `ConnectorCatalogReported`, `MetricUnverifiedRegistered`, `IngestAlert`, `IngestGapDetected`, `ClockSkewSuspected`, `AggregatesRecomputed`, `PartitionWarning` |
+| `message.decoder` | ING-02.01 | `PayloadDecoder`, `DecodedUplink`, `DecodedValue`, `DecodeException`, `DecoderKeys` |
+| `connector` | DSC-09.02 | `SourceConnector`, `ConnectorSession`, `RawSink`, `ConnectorDescriptor`, `ConnectorContext`, `SourceConfig`, `ConnectorStatus`, `ConnectionTestResult`, `ConnectorCatalogEntry`, `AckMode`, `ScalingMode` |
+| `messaging` | ING-01.01·05.01·OPS-02.03 | `MessagingNames`, `SuperStreamSpec`, `ConsumerGroups`, `StreamRoutingKeys`, `DedupKeys`, `ClientIds`, `MessageHeaders`, `MessageTracing` |
 
 ## 2. 빌드
 
 ```bash
-./mvnw verify      # 단위·슬라이스(*Test) + 통합(*IT, Testcontainers PostgreSQL 18) + 커버리지 80% 검사
+./mvnw verify      # 단위·슬라이스(*Test) + 통합(*IT, Testcontainers PostgreSQL 18·RabbitMQ 3.13 Stream) + 커버리지 80% 검사
 ./mvnw install     # 로컬 저장소에 설치(다른 서비스 로컬 빌드용)
 ```
 
@@ -288,7 +293,88 @@ class ArchitectureTest {
 
 조직 조건이 필요 없는 곳(조직 테이블 자체, 모든 조직을 도는 정리 배치, 토큰 해시로 찾는 인증 조회)은 메서드나 클래스에 `@OrganizationScopeExempt("이유")`를 붙입니다. 매개변수 이름을 읽으므로 서비스는 `-parameters`로 컴파일합니다(Spring Boot 부모 POM 기본값).
 
-## 13. 설정 키 요약
+## 13. 메시지 계약 (ING-01.01·02.01·05.01, conventions.md §3)
+
+RabbitMQ로 오가는 메시지는 모두 JSON이고 스키마 버전 `v`와 `messageId`(UUID)를 가집니다. 계약 record는 `message` 패키지에, JSON Schema(2020-12)는 `classpath:data2flow/contracts/schemas/`에 있습니다.
+
+| 메시지 | 채널 | 스키마 파일 | 생산 → 소비 |
+|---|---|---|---|
+| `RawEnvelope` v1 (EVT-ING-01) | Super Stream `data2flow.raw` | `raw-envelope.v1.json` | ingress·simulator → pipeline |
+| `CanonicalTelemetry` v1 (EVT-ING-02) | Super Stream `data2flow.telemetry` | `canonical-telemetry.v1.json` | pipeline → flow-engine·analytics·core-api(실시간) |
+| `ConfigChangedMessage` v1 (EVT-DEV-04·DSC-01·SCR-01·ING-08) | fanout `data2flow.config` | `config-changed.v1.json` | core-api → 모든 서비스(받으면 DB에서 다시 읽음) |
+| `DomainEvent<P>` v1 (EVT-DEV·DSC·ING·TSD) | topic `data2flow.events`, 라우팅 키 = `type` | `domain-event.v1.json` | 각 생산 서비스 → `{service}.events` |
+
+```java
+MessageCodec codec = MessageCodec.create();                 // 서비스에 하나, 스레드 안전
+byte[] body = codec.write(telemetry);
+CanonicalTelemetry t = codec.read(body, CanonicalTelemetry.class);
+DomainEvent<?> e = codec.readEvent(body);                    // type(라우팅 키)으로 페이로드 타입 결정
+DomainEvent<DevicePendingCreated> ev = DomainEvent.of(EventType.DEVICE_PENDING_CREATED, orgId, payload, requestId, clock);
+```
+
+- **호환 규칙:** 소비자는 모르는 필드를 무시하고, 모르는 enum 값은 기본값(`ConfigChangedMessage.EntityType.UNKNOWN`)으로 읽습니다. 필드 추가는 같은 버전에서 하고, 뜻이 바뀌는 변경만 `v`를 올립니다.
+- **버전 검사:** 본문 `v`가 없거나 아는 버전보다 크면 `UnsupportedSchemaVersionException`, 형식 오류·필수 필드 누락이면 `MessageFormatException`입니다. 둘 다 재시도하지 말고 DLQ로 보냅니다.
+- **도메인 이벤트 봉투:** `{v, messageId, type, organizationId, occurredAt, requestId?, payload}`. API 문서 이벤트 표의 "페이로드"가 `payload`입니다. 새 이벤트 종류는 `EventType`과 `domain-event.v1.json`의 `$defs`·`x-payloadTypes`에 함께 더합니다(계약 테스트가 둘이 맞는지 봅니다).
+- **헤더:** `MessageHeaders.of(message)`가 `messageId`·`v`·`schema`·`organizationId`(이벤트는 `occurredAt`·`X-REQUEST-ID`도)를 만듭니다. 스트림은 애플리케이션 속성, 큐는 AMQP 헤더에 싣습니다.
+- **계약 테스트:** `MessageSchemas.assertValid(message)`로 직렬화 결과가 스키마를 통과하는지 확인합니다(TC-ING-033). networknt json-schema-validator가 필요하며 테스트 키트가 가져옵니다.
+
+### 13.1 스트림 이름·라우팅 키·소비자 그룹 (architecture.md §4.2, reliability-and-ha.md §2)
+
+| 항목 | 값 | 코드 |
+|---|---|---|
+| Super Stream | `data2flow.raw` 12 파티션·7일/10GB, `data2flow.telemetry` 12 파티션·3일/5GB | `SuperStreamSpec.RAW`, `.TELEMETRY` |
+| 라우팅 키 | raw: `sha1(sourceId + topic)` 16진수, telemetry: `deviceId` | `RawEnvelope.routingKey()`, `CanonicalTelemetry.routingKey()` |
+| 소비자 그룹 | `pipeline`, `pipeline-reprocess`, `flow`, `analytics`, `core-live` | `ConsumerGroups.of(group, developer)` → 로컬은 `pipeline-nhn` |
+| vhost | `data2flow`(prod), `data2flow-stg`, `data2flow-dev` | `MessagingNames.VHOST_*` |
+| 중복 키 | ChirpStack `chirpstack:{deduplicationId}`, 그 밖 `sha256:…`, 값만 있는 payload `sha256b:…`(수신 시각 버킷) | `DedupKeys` |
+| MQTT client-id | `{base}-{env}-{n}`, 개발자 `{base}-dev-{이름}-{n}`, 연결 테스트 `{base}-test-{난수}` | `ClientIds` |
+
+같은 라우팅 키는 같은 파티션이고 한 파티션은 활성 소비자 하나가 순서대로 처리하므로 기기별 순서가 지켜집니다. 오프셋 저장은 DB 커밋 뒤에 합니다.
+
+## 14. 디코더 SPI (ING-02.01)
+
+pipeline의 디코더(`chirpstack-v4`·`generic-json`·`single-value`, DECODE 스크립트 `script:{id}@v{n}`)는 `PayloadDecoder`를 구현합니다. 원본 하나를 기기 식별 전 `DecodedUplink`(externalId, measuredAt?, 원본 키 측정값, link, tags) 하나로 바꾸고, 해석할 수 없으면 `DecodeException`(결과 코드 `ING_DECODE_FAILED`)을 던집니다. 문자열·불린 값(`magnet_status: "open"`)은 `DecodedValue`에 그대로 담아 상태 매핑 단계(ING-02.06)가 숫자로 바꿉니다.
+
+## 15. 커넥터 SPI와 계약 테스트 키트 (DSC-09.02·09.03, connectors.md §1)
+
+ingress 커넥터는 `SourceConnector`(설명·설정 스키마·연결 테스트·세션 열기)와 `ConnectorSession`(start·pause·resume·status·close)을 구현합니다. 받은 메시지는 `ConnectorContext.envelope(config, topic, payload)`로 `RawEnvelope`를 만들어 `RawSink.write`에 넘기고, **그 단계가 정상 완료된 뒤에만** 상대에게 확인(PUBACK·ack·오프셋 커밋·커서 저장)합니다.
+
+카탈로그에 올리려면 커넥터마다 `AbstractConnectorContractTest`(테스트 키트)를 상속한 `*ContractIT`가 통과해야 합니다(BR-DSC-23).
+
+```java
+@Testcontainers
+class Mqtt5ConnectorContractIT extends AbstractConnectorContractTest {
+    @Container static final GenericContainer<?> EMQX = new GenericContainer<>("emqx/emqx:5").withExposedPorts(1883);
+    @Override protected SourceConnector connector() { return new MqttConnector(); }
+    @Override protected SourceConfig sourceConfig() { return new SourceConfig(1, 3, SourceTypes.CONNECTOR, "mqtt", config(), secrets(), "kit-0"); }
+    @Override protected ContractPeer peer() { return mqttPeer; }   // 발행하고 확인(PUBACK) 수를 센다
+}
+```
+
+키트 시나리오: 설명·스키마·카탈로그 항목, 연결 테스트 성공, 1,000건 무손실 수신과 봉투 필드, **기록 전 확인 금지**(AT-DSC-18.1), 기록 실패 시 재전송, 일시정지·재개, 상태 보고와 닫기. 확인 방식이 `AUTO`·`NONE`인 커넥터는 확인 시점 시나리오를 건너뜁니다(화면에 "유실 가능").
+
+## 16. 공유 메시지 픽스처 (TC-ING-033·065)
+
+`MessageFixtures`(테스트 키트)는 아카데미 실측 6종(EM300-TH, EM320-TH, EM500-CO2, AM103, AM107, WS302)의 `CanonicalTelemetry`, 가상·승인 대기·늦은 도착·파생 항목 메시지, 모르는 필드가 섞인 메시지(`with-unknown-fields`), ChirpStack v4 업링크 원본을 줍니다. pipeline은 디코더 출력이, 소비 서비스는 역직렬화가 이 픽스처와 맞는지 계약 테스트에서 확인합니다.
+
+## 17. 메시지 추적 전파 (OPS-02.03)
+
+`MessageTracing`이 W3C `traceparent`를 메시지 헤더에 넣고 꺼내 ingress → pipeline → flow-engine을 하나의 추적으로 잇습니다. Micrometer Tracing을 쓰므로 OTel 브리지가 있으면 OTel로 내보내고, 추적을 끈 서비스는 `MessageTracing.noop()`을 씁니다(동작은 같음).
+
+```java
+Map<String, Object> headers = MessageHeaders.of(envelope);
+Span span = tracing.startProducerSpan(MessagingNames.STREAM_RAW, headers);      // 발행 전
+producer.send(message(headers), status -> tracing.end(span, status.isConfirmed() ? null : failure));
+
+Span span = tracing.startConsumerSpan(MessagingNames.STREAM_RAW, applicationProperties);   // 소비
+try (Tracer.SpanInScope scope = tracing.inScope(span)) { handle(message); } finally { span.end(); }
+```
+
+`ObservabilityIT`가 실제 RabbitMQ 3.13 Super Stream에서 같은 기기의 파티션·순서 유지, 헤더, 추적 연결을 확인합니다.
+
+> 사용자 JS 샌드박스(GraalJS, ADR-008)는 이 라이브러리에 없습니다. 스펙 배치(SCR-02.01·02.02)가 data2flow-pipeline이므로 pipeline이 만듭니다. GraalJS 버전(`polyglot`·`js-community`)만 BOM이 정합니다.
+
+## 18. 설정 키 요약
 
 | 키 | 기본값 | 설명 |
 |---|---|---|
