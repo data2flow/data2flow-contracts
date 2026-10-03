@@ -68,9 +68,12 @@ class GlobalExceptionHandlerWebTest {
     }
 
     @Test
-    @DisplayName("본문을 읽을 수 없으면 400, 없는 경로는 404 RESOURCE_NOT_FOUND")
+    @DisplayName("본문을 읽을 수 없거나 Content-Type이 맞지 않으면 400, 없는 경로는 404 RESOURCE_NOT_FOUND")
     void badBodyAndNotFound() throws Exception {
         mvc.perform(post("/samples").contentType(MediaType.APPLICATION_JSON).content("{"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.header.resultCode").value("INVALID_REQUEST"));
+        mvc.perform(post("/samples").contentType(MediaType.APPLICATION_FORM_URLENCODED).content("name=a"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.header.resultCode").value("INVALID_REQUEST"));
         mvc.perform(get("/nowhere"))

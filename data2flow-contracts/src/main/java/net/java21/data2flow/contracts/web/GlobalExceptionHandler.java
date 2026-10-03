@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -65,7 +66,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class,
-            MissingServletRequestParameterException.class, MissingRequestHeaderException.class})
+            MissingServletRequestParameterException.class, MissingRequestHeaderException.class,
+            HttpMediaTypeNotSupportedException.class})
     public ResponseEntity<ErrorResponse> handleBadRequest(Exception ex) {
         return respond(CommonErrorCode.INVALID_REQUEST, List.of());
     }
