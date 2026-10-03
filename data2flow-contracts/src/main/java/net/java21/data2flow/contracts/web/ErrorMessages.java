@@ -32,7 +32,12 @@ public class ErrorMessages {
     }
 
     public String resolve(ErrorCode code, Object... args) {
-        Locale locale = supported(LocaleContextHolder.getLocale());
+        return resolve(code, LocaleContextHolder.getLocale(), args);
+    }
+
+    /** 요청 언어를 직접 넘긴다. DispatcherServlet 앞의 필터처럼 LocaleContextHolder가 아직 없을 때 쓴다 */
+    public String resolve(ErrorCode code, Locale requested, Object... args) {
+        Locale locale = supported(requested);
         if (serviceMessages != null) {
             try {
                 return serviceMessages.getMessage(code.messageKey(), args, locale);

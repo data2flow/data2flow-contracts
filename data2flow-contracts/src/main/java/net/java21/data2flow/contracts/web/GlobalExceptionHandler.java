@@ -7,6 +7,7 @@ import net.java21.data2flow.contracts.error.ErrorCode;
 import net.java21.data2flow.contracts.error.FieldErrorDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -37,7 +38,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusiness(BusinessException ex) {
-        return respond(ex.getErrorCode(), ex.getErrors(), ex.getArgs());
+        ResponseEntity<ErrorResponse> response = respond(ex.getErrorCode(), ex.getErrors(), ex.getArgs());
+        if (ex.getHeaders().isEmpty()) {
+            return response;
+        }
+        HttpHeaders headers = new HttpHeaders();
+        ex.getHeaders().forEach(headers::set);
+        return ResponseEntity.status(response.getStatusCode()).headers(headers).body(response.getBody());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
