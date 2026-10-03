@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /** TC-OPS-145(AT-OPS-25.8): 오류 응답 형식과 Accept-Language 현지화. resultCode는 언어와 관계없이 같다 */
 @WebMvcTest(controllers = GlobalExceptionHandlerWebTest.SampleController.class)
 @Import(GlobalExceptionHandlerWebTest.SampleController.class)
+@TestPropertySource(properties = "data2flow.identity.enabled=false")
 class GlobalExceptionHandlerWebTest {
 
     @Autowired
