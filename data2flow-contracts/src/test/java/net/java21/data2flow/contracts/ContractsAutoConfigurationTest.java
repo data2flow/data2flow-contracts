@@ -100,6 +100,14 @@ class ContractsAutoConfigurationTest {
     }
 
     @Test
+    @DisplayName("[IAM-01.01] 웹이 아닌 실행(최초 관리자 Job)에도 PermissionLookup이 있으면 RoleChecker를 만든다")
+    void roleCheckerInNonWebApplication() {
+        new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(ContractsAuthorizationAutoConfiguration.class))
+                .withBean(PermissionLookup.class, () -> (o, u) -> AccessGrant.none())
+                .run(ctx -> assertThat(ctx).hasSingleBean(RoleChecker.class));
+    }
+
+    @Test
     @DisplayName("리액티브 앱(gateway)에는 서블릿 필터·RoleChecker·멱등 처리를 만들지 않는다")
     void reactiveUnaffected() {
         new ReactiveWebApplicationContextRunner().withConfiguration(ALL)
