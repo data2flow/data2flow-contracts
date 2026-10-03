@@ -10,9 +10,9 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>data2flow-contracts</artifactId>
-    <name>data2flow-contracts</name>
-    <description>공통 응답(ApiResponse·ListApiResponse), 오류 코드와 예외 처리, 4개 언어 오류 문구, 신원·요청 헤더와 신원 필터, 권한표·RoleChecker, 감사 기록, Idempotency-Key, baseVersion, 호출 한도 응답, 비밀값 암호화·마스킹, 메시지 이름 상수</description>
+    <artifactId>data2flow-contracts-test</artifactId>
+    <name>data2flow-contracts-test</name>
+    <description>서비스 테스트 키트(test 범위로 쓴다): 공통 ArchUnit 규칙(조직 조건 강제 BR-IAM-01, Thread.sleep 금지, 시스템 시계 직접 호출 금지). design/testing/backend.md §6</description>
 
     <dependencyManagement>
         <dependencies>
@@ -27,22 +27,16 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- 서블릿 서비스에서만 켜지는 자동 구성. 리액티브 gateway는 상수·오류 코드만 쓰므로 웹 의존성을 강제하지 않는다 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc</artifactId>
-            <optional>true</optional>
+            <groupId>net.java21.data2flow</groupId>
+            <artifactId>data2flow-contracts</artifactId>
+            <version>${project.version}</version>
         </dependency>
+        <!-- Apache-2.0 (ADR-018) -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <!-- JdbcIdempotencyStore와 낙관적 잠금 예외(spring-tx). DB를 쓰는 서비스에만 있으면 된다 -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-            <optional>true</optional>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit</artifactId>
+            <version>${archunit.version}</version>
         </dependency>
 
         <dependency>
@@ -51,24 +45,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-webmvc-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!-- *IT: 실제 PostgreSQL 18(Testcontainers, H2 금지) -->
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers-postgresql</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -79,18 +57,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
+                    <!-- 규칙이 매개변수 이름(organizationId)을 읽는다. 서비스도 -parameters로 컴파일한다(Spring Boot 기본) -->
                     <parameters>true</parameters>
                 </configuration>
             </plugin>
-            <!-- *IT는 failsafe로 verify 단계에서 실행(design/testing/backend.md §2). JaCoCo보다 먼저 선언해 IT 커버리지도 합산 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <executions>
-                    <execution><goals><goal>integration-test</goal><goal>verify</goal></goals></execution>
-                </executions>
-            </plugin>
-            <!-- 커버리지 80% 강제(design/testing) -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>

@@ -9,11 +9,12 @@
     <version>${revision}</version>
     <packaging>pom</packaging>
     <name>data2flow-contracts-parent</name>
-    <description>data2flow 공통 계약: 의존성 버전 목록(BOM)과 공통 응답·오류·신원 헤더·메시지 계약 (design/conventions.md §3)</description>
+    <description>data2flow 공통 계약: 의존성 버전 목록(BOM), 공통 응답·오류·신원·권한·감사·멱등·비밀값 계약, 테스트 키트 (design/conventions.md §3)</description>
 
     <modules>
         <module>data2flow-bom</module>
         <module>data2flow-contracts</module>
+        <module>data2flow-contracts-test</module>
     </modules>
 
     <properties>
@@ -22,6 +23,8 @@
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>4.1.1</spring-boot.version>
+        <!-- ArchUnit(Apache-2.0): BOM과 data2flow-contracts-test가 함께 쓴다 -->
+        <archunit.version>1.5.1</archunit.version>
     </properties>
 
     <distributionManagement>
@@ -32,6 +35,26 @@
     </distributionManagement>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                </plugin>
+                <!-- 단위·슬라이스(*Test)는 surefire, 통합(*IT)은 failsafe. 같은 버전으로 맞춘다 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.5.6</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <!-- ${revision}을 설치·배포되는 POM에 실제 값으로 남긴다 -->
             <plugin>
