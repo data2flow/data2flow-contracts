@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.java21.data2flow</groupId>
+        <artifactId>data2flow-contracts-parent</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>data2flow-bom</artifactId>
+    <packaging>pom</packaging>
+    <name>data2flow-bom</name>
+    <description>서비스가 버전 없이 이름만 쓰도록 공통 의존성 버전을 한 곳에서 정한다. Spring Boot가 관리하는 라이브러리(Testcontainers, Flyway, PostgreSQL 드라이버 등)는 여기서 다시 정하지 않는다. 라이선스는 design/oss-stack.md에서 확인한 것만 넣는다(ADR-018).</description>
+
+    <properties>
+        <!-- GraalJS 커뮤니티판(UPL). org.graalvm.polyglot:js(Oracle판, GFTC)는 금지(ADR-008) -->
+        <graalvm-polyglot.version>25.0.4</graalvm-polyglot.version>
+        <hivemq-mqtt-client.version>1.3.17</hivemq-mqtt-client.version>
+        <springdoc.version>3.1.1</springdoc.version>
+        <archunit.version>1.5.1</archunit.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>net.java21.data2flow</groupId>
+                <artifactId>data2flow-contracts</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.polyglot</groupId>
+                <artifactId>polyglot</artifactId>
+                <version>${graalvm-polyglot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.polyglot</groupId>
+                <artifactId>js-community</artifactId>
+                <version>${graalvm-polyglot.version}</version>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>com.hivemq</groupId>
+                <artifactId>hivemq-mqtt-client</artifactId>
+                <version>${hivemq-mqtt-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.tngtech.archunit</groupId>
+                <artifactId>archunit-junit5</artifactId>
+                <version>${archunit.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
