@@ -1,6 +1,6 @@
 # data2flow-contracts
 
-data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비스를 만드는 백엔드 개발자가 읽습니다. 다 읽으면 서비스에 의존성을 넣고, 신원 필터·권한 검사(RoleChecker)·감사 기록·`Idempotency-Key`·`baseVersion`·호출 한도 응답·비밀값 암호화와 가림·ArchUnit 규칙을 연결하고, 수집 경로(M2)의 메시지 계약·디코더 SPI·커넥터 SPI와 계약 테스트 키트·메시지 추적 전파, 가상 폐루프(M3)의 기능(Capability) 카탈로그·명령 검증·상태 쌍·행동 요청·제어/시뮬레이터/플로우 이벤트를 쓸 수 있습니다.
+data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비스를 만드는 백엔드 개발자가 읽습니다. 다 읽으면 서비스에 의존성을 넣고, 신원 필터·권한 검사(RoleChecker)·감사 기록·`Idempotency-Key`·`baseVersion`·호출 한도 응답·비밀값 암호화와 가림·ArchUnit 규칙을 연결하고, 수집 경로(M2)의 메시지 계약·디코더 SPI·커넥터 SPI와 계약 테스트 키트·메시지 추적 전파, 가상 폐루프(M3)의 기능(Capability) 카탈로그·명령 검증·상태 쌍·행동 요청·제어/시뮬레이터/플로우 이벤트, 사용자 JavaScript 샌드박스(`data2flow-script-sandbox`)를 쓸 수 있습니다.
 
 규칙의 정본은 `data2flow-docs`의 `design/api-rules.md`(ADR-035), `design/auth.md` §7, `design/conventions.md` §3, `design/testing/backend.md` §6입니다. 이 문서는 그 규칙을 코드에서 어떻게 쓰는지만 설명합니다.
 
@@ -11,6 +11,7 @@ data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비�
 | `data2flow-bom` | `import` | 공통 의존성 버전 목록. 서비스는 이 BOM을 import하고 버전 없이 이름만 씁니다 |
 | `data2flow-contracts` | `compile` | 공통 응답·오류·4개 언어 문구, 신원 헤더와 신원 필터, 권한표와 `RoleChecker`, 감사 기록 모양, `Idempotency-Key`, `baseVersion`, 목록 파라미터, 호출 한도 응답, 비밀값 암호화·가림, RabbitMQ 이름·라우팅 키·소비자 그룹, 메시지 계약(`RawEnvelope`·`CanonicalTelemetry`·`ConfigChangedMessage`·`DomainEvent`)과 JSON Schema, 디코더·커넥터 SPI, 메시지 추적 전파 |
 | `data2flow-contracts-test` | `test` | 테스트 키트: 공통 ArchUnit 규칙(조직 조건 강제, `Thread.sleep` 금지, 시스템 시계 직접 호출 금지), 커넥터 계약 테스트 키트, 공유 메시지 픽스처 |
+| `data2flow-script-sandbox` | `compile`(pipeline·flow-engine만) | 사용자 JavaScript 샌드박스(GraalJS 커뮤니티판, ADR-008·046): 실행 격리, CPU 워치독, 반환값 변환, 머리말(`ctx.util`), 적응형 예열, 시간 초과 재시도. 패키지 `net.java21.data2flow.script.sandbox`. 사용법은 §20 |
 
 패키지(`net.java21.data2flow.contracts.*`)와 스펙의 대응은 아래와 같습니다.
 
@@ -377,7 +378,7 @@ try (Tracer.SpanInScope scope = tracing.inScope(span)) { handle(message); } fina
 
 `ObservabilityIT`가 실제 RabbitMQ 3.13 Super Stream에서 같은 기기의 파티션·순서 유지, 헤더, 추적 연결을 확인합니다.
 
-> 사용자 JS 샌드박스(GraalJS, ADR-008)는 이 라이브러리에 없습니다. 스펙 배치(SCR-02.01·02.02)가 data2flow-pipeline이므로 pipeline이 만듭니다. GraalJS 버전(`polyglot`·`js-community`)만 BOM이 정합니다.
+> 사용자 JS 샌드박스(GraalJS, ADR-008)는 별도 모듈 `data2flow-script-sandbox`에 있습니다(§20, ADR-046). GraalJS 버전(`polyglot`·`js-community`)은 BOM이 정합니다.
 
 ## 18. 제어 계약: 기능·명령·상태 쌍 (M3, ACT-01·02, ADR-009)
 
@@ -497,3 +498,47 @@ CommandPayload cmd = req.commandPayload();
 | `data2flow.idempotency.max-body-bytes` | `10485760` | 미리 읽는 본문 상한(넘으면 413) |
 | `data2flow.secrets.master-keys` | 없음 | `kid:Base64,…` |
 | `data2flow.secrets.active-key-id` | 키가 하나면 그 키 | 암호화 키 |
+
+## 20. 사용자 JavaScript 샌드박스 (SCR-02.01·02.02, FLW-02 JS 함수 노드, ADR-008·046)
+
+`data2flow-script-sandbox`는 사용자가 쓴 JavaScript(pipeline의 디코더·변환 스크립트, flow-engine의 JS 함수 노드)를 안전하게 실행하는 공용 모듈입니다. 전에는 pipeline과 flow-engine이 같은 코드를 따로 들고 있어 pipeline에서 고친 것(예열, 재시도 등)이 flow-engine에 늦게 들어갔습니다. 이제 두 서비스가 이 모듈 하나를 씁니다(ADR-046). 쓰는 서비스는 pipeline과 flow-engine뿐이고, 다른 서비스는 넣지 않습니다(GraalJS 의존성이 수십 MB입니다).
+
+```xml
+<dependency>
+  <groupId>net.java21.data2flow</groupId>
+  <artifactId>data2flow-script-sandbox</artifactId>   <!-- 버전은 data2flow-bom. polyglot·js-community(UPL)를 함께 가져온다 -->
+</dependency>
+```
+
+공개 타입은 아래와 같습니다(패키지 `net.java21.data2flow.script.sandbox`).
+
+| 타입 | 하는 일 |
+|---|---|
+| `ScriptSandbox` | `run(entry, code, sourceName, inputJson, ctxJson, now)` → `ScriptOutcome`(예외를 던지지 않음), `syntaxCheck(code, sourceName)`, `warmUp(WarmUpPolicy)` → `WarmUpResult`, `limits()`, `close()` |
+| `ScriptLimits` | CPU 50ms·벽시계 1초·문장 수·출력 64KB·로그 1KB×100·문자열·배열 길이·코드 64KB·출력 깊이. `defaults()`가 운영 기본값 |
+| `ScriptOutcome` | `output`(JsonNode), `failure`, `logs`, `durationMs`, `outputBytes`, `ok()`, `returnedNull()` |
+| `ScriptFailure`, `ScriptErrorCode` | `SCRIPT_TIMEOUT`·`SCRIPT_RUNTIME_ERROR`·`SCRIPT_FORBIDDEN_API`·`SCRIPT_OUTPUT_INVALID`와 메시지(500자)·줄·열 |
+| `ScriptWatchdog` | 실행 스레드 CPU 시간 감시(샌드박스가 내부에서 씀) |
+
+서비스마다 다른 부분은 호출하는 쪽이 정합니다.
+
+- **진입 함수 이름:** pipeline은 `decode`·`transform`(`ScriptKind.functionName()`), flow-engine JS 함수 노드는 자체 래퍼 함수 이름을 `entry`로 넘깁니다.
+- **ctx 추가 필드:** `new ScriptSandbox(limits, List.of("flow", "node"))`처럼 이름을 주면 ctx JSON의 같은 이름 값을 얼려서 `ctx.config` 바로 뒤에 넣습니다(없으면 null). 기본 필드는 `config`, `device`, `last`, `source`, `modules`, `util`, `log`, `window`입니다.
+- **반환값 계약 검사:** 측정값 형식(pipeline `ScriptOutputValidator`)이나 출력 포트 해석(flow-engine)은 서비스에 둡니다. 샌드박스는 JSON으로 옮길 수 있는지와 크기·깊이만 봅니다.
+
+```java
+ScriptSandbox sandbox = new ScriptSandbox(ScriptLimits.defaults());
+ScriptSandbox.WarmUpResult warm = sandbox.warmUp(ScriptSandbox.WarmUpPolicy.defaults());   // readiness 전에 한 번
+ScriptOutcome outcome = sandbox.run("transform", code, "script-42-v3.js", inputJson, ctxJson, clock.instant());
+if (!outcome.ok()) { /* outcome.failure().code() */ }
+```
+
+동작에서 알아 둘 점은 다음과 같습니다.
+
+- 실행마다 새 Context를 만들고(Engine은 공유), 호스트·입출력·스레드·프로세스·환경 변수·다른 언어 접근, `eval`·`Function`, `import`를 막습니다. `js.lazy-translation=false`로 함수 번역을 감시 구간 밖(parse 때)에서 치릅니다.
+- CPU 시간이 한도를 넘으면 같은 한도로 **최대 2번** 다시 실행합니다. 처음 시간 초과이거나 전에 성공한 코드만 재시도하고, 시간 초과로 끝난 코드는 다음부터 재시도하지 않습니다(무한 루프는 처음 한 번만 3×50ms를 씁니다). 해석 실행에서 JVM 쪽 사건(HotSpot 재컴파일, GC 직후)이 한 실행에 수백 ms를 더하고 다음 실행도 느릴 수 있기 때문입니다(ADR-046).
+- 가상 스레드에서 부르면 플랫폼 스레드 풀(크기 = CPU 수)에서 실행하고 기다립니다. 가상 스레드는 스레드 CPU 시간을 잴 수 없어 벽시계로 재게 되기 때문입니다.
+- 예열은 횟수를 고정하지 않고 대표 스크립트 1회의 감시 구간 CPU가 목표(기본 10ms) 아래로 3바퀴 이어질 때까지 합니다(최소 5·최대 80바퀴, 최대 30초). 목표에 못 미치면 `reachedTarget=false`로 알려 주니 시작 로그에 경고를 남깁니다.
+- JaCoCo를 쓰는 서비스는 에이전트에서 `com.oracle.*`·`org.graalvm.*`를 빼야 합니다. 계측하면 해석 실행이 2배쯤 느려져 50ms 한도 시험이 운영과 다른 조건에서 돕니다.
+
+모듈 시험은 공격 코퍼스 42종(`src/test/resources/script-attacks/`: 호스트 접근 13·우회 8·프로토타입 오염 6·무한 루프 5·메모리 5·거대 출력 5), `ctx.util` 헬퍼, 워치독, 가상 스레드, 예열, 재시도, 라이선스 가드(`org.graalvm.polyglot:js` Oracle판이 클래스패스에 없음)를 확인합니다.

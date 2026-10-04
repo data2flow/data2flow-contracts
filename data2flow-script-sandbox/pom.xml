@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.java21.data2flow</groupId>
+        <artifactId>data2flow-contracts-parent</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>data2flow-script-sandbox</artifactId>
+    <name>data2flow-script-sandbox</name>
+    <description>사용자 JavaScript 샌드박스(SCR-02.01·02.02, FLW-02 JS 함수 노드, ADR-008·046): GraalJS 커뮤니티판 실행 격리, CPU 워치독, 출력 변환, 머리말(ctx.util), 적응형 예열, 공격 코퍼스 42종 시험. data2flow-pipeline(디코더·변환 스크립트)과 data2flow-flow-engine(JS 함수 노드)이 함께 쓴다</description>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- GraalJS 커뮤니티판(UPL). org.graalvm.polyglot:js(Oracle판, GFTC)는 금지(ADR-008). 버전은 부모 POM(BOM과 같은 값) -->
+        <dependency>
+            <groupId>org.graalvm.polyglot</groupId>
+            <artifactId>polyglot</artifactId>
+            <version>${graalvm-polyglot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.polyglot</groupId>
+            <artifactId>js-community</artifactId>
+            <version>${graalvm-polyglot.version}</version>
+            <type>pom</type>
+        </dependency>
+        <!-- 반환값을 JsonNode로 옮긴다(ScriptOutcome.output). 모든 서비스가 Jackson 3을 이미 쓴다(Apache-2.0) -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- JUnit 5(EPL-2.0, 수정 없이 사용)·AssertJ(Apache-2.0) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 라이선스 정책(ADR-008·018): GraalJS Oracle판(GFTC)·enterprise·isolate 런타임 금지 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>ban-non-community-graal</id>
+                        <goals><goal>enforce</goal></goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>org.graalvm.polyglot:js</exclude>
+                                        <exclude>org.graalvm.polyglot:js-isolate</exclude>
+                                        <exclude>org.graalvm.truffle:truffle-enterprise</exclude>
+                                        <exclude>org.graalvm.polyglot:*-isolate</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- 커버리지 80% 강제 -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.15</version>
+                <executions>
+                    <!-- 에이전트는 GraalJS·Truffle(제3자, 보고서 대상 아님)을 계측하지 않는다. 계측하면 해석 실행 경로가 2배쯤 느려져
+                         스크립트 CPU 50ms 한도 시험이 운영과 다른 조건에서 돈다(SCR-02.02) -->
+                    <execution><id>prepare</id><goals><goal>prepare-agent</goal></goals>
+                        <configuration><excludes><exclude>com.oracle.*</exclude><exclude>org.graalvm.*</exclude></excludes></configuration>
+                    </execution>
+                    <execution><id>report</id><phase>verify</phase><goals><goal>report</goal></goals></execution>
+                    <execution>
+                        <id>check</id><phase>verify</phase><goals><goal>check</goal></goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits><limit><counter>LINE</counter><value>COVEREDRATIO</value><minimum>0.80</minimum></limit></limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

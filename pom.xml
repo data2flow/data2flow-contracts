@@ -15,6 +15,7 @@
         <module>data2flow-bom</module>
         <module>data2flow-contracts</module>
         <module>data2flow-contracts-test</module>
+        <module>data2flow-script-sandbox</module>
     </modules>
 
     <properties>
@@ -27,6 +28,8 @@
         <archunit.version>1.5.1</archunit.version>
         <!-- networknt json-schema-validator(Apache-2.0, Jackson 3): 메시지 계약 JSON Schema 검증. BOM·contracts·contracts-test가 함께 쓴다 -->
         <json-schema-validator.version>3.0.6</json-schema-validator.version>
+        <!-- GraalJS 커뮤니티판(UPL). org.graalvm.polyglot:js(Oracle판, GFTC)는 금지(ADR-008). BOM과 data2flow-script-sandbox가 함께 쓴다 -->
+        <graalvm-polyglot.version>25.0.4</graalvm-polyglot.version>
     </properties>
 
     <distributionManagement>
