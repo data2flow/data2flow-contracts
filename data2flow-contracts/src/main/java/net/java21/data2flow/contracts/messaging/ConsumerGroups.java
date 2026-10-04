@@ -19,6 +19,8 @@ public final class ConsumerGroups {
     public static final String FLOW = "flow";
     /** analytics: {@code data2flow.telemetry} */
     public static final String ANALYTICS = "analytics";
+    /** action 출력 연결(DSC-04.01, BR-DSC-19): {@code data2flow.telemetry}를 별도 소비자로 읽어 외부 MQTT·Webhook으로 전달 */
+    public static final String ACTION_OUTPUT = "action-output";
     /** core-api 실시간 화면: {@code data2flow.telemetry}, 비SAC·최신부터(오프셋 저장 안 함) */
     public static final String CORE_LIVE = "core-live";
 

@@ -94,6 +94,12 @@ public record CanonicalTelemetry(
         return metrics.stream().filter(m -> m.key().equals(key)).findFirst().orElse(null);
     }
 
+    /** 측정값만 바꾼 사본(같은 messageId). 출력 연결 필터(DSC-04.01)가 걸러진 측정값만 보낼 때 쓴다 */
+    public CanonicalTelemetry withMetrics(List<Metric> newMetrics) {
+        return new CanonicalTelemetry(v, messageId, organizationId, sourceId, externalId, deviceId, deviceStatus, modelId,
+                spaceId, measuredAt, receivedAt, late, virtual, newMetrics, link, meta, rawMessageId);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
