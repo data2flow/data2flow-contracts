@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://data2flow.java21.net/schemas/flow-debug.v1.json",
+  "title": "FlowDebugMessage v1 (EVT-FLW-01, data2flow.debug, 라우팅 키 flow.{flowId})",
+  "description": "라이브 뷰 디버그 메시지. node.stats는 노드별 1초 카운터, node.sample은 샘플 메시지 하나다. 손실 허용. 소비자는 모르는 필드를 무시한다.",
+  "type": "object",
+  "required": ["v", "messageId", "type", "flowId", "instanceId", "t", "version"],
+  "properties": {
+    "v": {"const": 1},
+    "messageId": {"type": "string", "format": "uuid"},
+    "type": {"enum": ["node.stats", "node.sample"]},
+    "flowId": {"type": "string", "minLength": 1},
+    "instanceId": {"type": "string", "minLength": 1},
+    "t": {"type": "string", "format": "date-time"},
+    "version": {"type": "integer", "minimum": 0},
+    "stats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["nodeId", "in", "out", "errors"],
+        "properties": {
+          "nodeId": {"type": "string", "minLength": 1},
+          "in": {"type": "integer", "minimum": 0},
+          "out": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+          "errors": {"type": "integer", "minimum": 0},
+          "lastAt": {"type": "string", "format": "date-time"},
+          "status": {"enum": ["OK", "WARN", "ERROR"]},
+          "lastError": {"type": "string"}
+        }
+      }
+    },
+    "sample": {
+      "type": "object",
+      "required": ["nodeId", "direction", "masked"],
+      "properties": {
+        "nodeId": {"type": "string", "minLength": 1},
+        "messageId": {"type": "string"},
+        "direction": {"enum": ["in", "out"]},
+        "port": {"type": "string"},
+        "payload": {},
+        "masked": {"type": "boolean"}
+      }
+    }
+  },
+  "allOf": [
+    {"if": {"properties": {"type": {"const": "node.stats"}}, "required": ["type"]}, "then": {"required": ["stats"]}},
+    {"if": {"properties": {"type": {"const": "node.sample"}}, "required": ["type"]}, "then": {"required": ["sample"]}}
+  ]
+}

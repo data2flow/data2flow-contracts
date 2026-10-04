@@ -128,11 +128,14 @@ class DomainEventContractTest {
         SAMPLES.put(EventType.FLOW_APPLY_REPORTED, new FlowApplyReported("f-7f3a", "data2flow-flow-engine-0", 13, 2L, 41, null));
         SAMPLES.put(EventType.FLOW_STATE_CHANGED, new FlowStateChanged("f-7f3a", "ACTIVE", "DEGRADED",
                 FlowStateChanged.Reason.DEGRADED, new FlowStateChanged.Metrics(0.3, 12.5), T));
+
+        // M4 자동화 완성·M5 데이터 관리
+        SAMPLES.putAll(M4M5EventSamples.all());
     }
 
     @ParameterizedTest
     @EnumSource(EventType.class)
-    @DisplayName("ING-05.01 TC-ING-065 모든 M2·M3 이벤트가 봉투 스키마(domain-event.v1.json)를 통과하고 같은 값으로 읽힌다")
+    @DisplayName("ING-05.01 TC-ING-065 모든 M2~M5 이벤트가 봉투 스키마(domain-event.v1.json)를 통과하고 같은 값으로 읽힌다")
     void everyEventRoundTripsAndMatchesSchema(EventType type) {
         EventPayload payload = SAMPLES.get(type);
         assertThat(payload).as("샘플 누락: " + type).isNotNull();

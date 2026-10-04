@@ -77,4 +77,20 @@ class ConfigChangedMessageTest {
         assertThatThrownBy(() -> codec.read(DOC_EXAMPLE.replace("\"op\": \"UPSERT\",", ""), ConfigChangedMessage.class))
                 .isInstanceOf(MessageFormatException.class).hasMessageContaining("op");
     }
+
+    @org.junit.jupiter.api.Test
+    @org.junit.jupiter.api.DisplayName("ACT-06.02·FLW-04.01·OPS-06.01·RUL-03 M4 설정 변경 종류(INTERLOCK·SINK_CONNECTION·NOTIFICATION_*·SILENCE·ON_CALL·NOTIFY_PREFERENCE·EDGE)를 읽고 쓴다")
+    void m4EntityTypesRoundTrip() {
+        MessageCodec c = MessageCodec.create();
+        for (ConfigChangedMessage.EntityType type : java.util.List.of(ConfigChangedMessage.EntityType.INTERLOCK,
+                ConfigChangedMessage.EntityType.SINK_CONNECTION, ConfigChangedMessage.EntityType.NOTIFICATION_CHANNEL,
+                ConfigChangedMessage.EntityType.NOTIFICATION_POLICY, ConfigChangedMessage.EntityType.NOTIFICATION_TEMPLATE,
+                ConfigChangedMessage.EntityType.SILENCE, ConfigChangedMessage.EntityType.ON_CALL,
+                ConfigChangedMessage.EntityType.NOTIFY_PREFERENCE, ConfigChangedMessage.EntityType.EDGE)) {
+            ConfigChangedMessage m = ConfigChangedMessage.upsert(type, 7, 2, 1,
+                    java.time.Clock.fixed(java.time.Instant.parse("2026-10-03T00:00:00Z"), java.time.ZoneOffset.UTC));
+            MessageSchemas.assertValid(m);
+            org.assertj.core.api.Assertions.assertThat(c.read(c.write(m), ConfigChangedMessage.class)).isEqualTo(m);
+        }
+    }
 }

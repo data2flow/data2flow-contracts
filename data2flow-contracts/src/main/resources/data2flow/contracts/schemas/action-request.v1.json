@@ -84,6 +84,44 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "NOTIFY"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/notificationRequest"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "SINK"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/sinkWriteRequest"
+          }
+        }
+      }
     }
   ],
   "$defs": {
@@ -207,6 +245,193 @@
         },
         "awaitResult": {
           "type": "boolean"
+        }
+      }
+    },
+    "notificationRequest": {
+      "type": "object",
+      "required": [
+        "event"
+      ],
+      "properties": {
+        "alarmId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "event": {
+          "type": "string",
+          "minLength": 1
+        },
+        "eventSeq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "severity": {
+          "enum": [
+            "CRITICAL",
+            "MAJOR",
+            "MINOR",
+            "WARNING",
+            "INFO"
+          ]
+        },
+        "policyId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "recipients": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "type",
+              "channel"
+            ],
+            "properties": {
+              "type": {
+                "enum": [
+                  "USER",
+                  "ROLE",
+                  "ON_CALL",
+                  "CHANNEL_DEFAULT"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "channel": {
+                "type": "string",
+                "minLength": 1
+              },
+              "address": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "templateKeys": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "variables": {
+          "type": "object"
+        },
+        "aggregateWindowSec": {
+          "anyOf": [
+            {
+              "const": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 600
+            }
+          ]
+        },
+        "aggregateKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "escalation": {
+          "type": "object",
+          "required": [
+            "stepNo"
+          ],
+          "properties": {
+            "stepNo": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3
+            }
+          }
+        },
+        "link": {
+          "type": "string"
+        },
+        "virtual": {
+          "type": "boolean"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "policyId"
+          ]
+        },
+        {
+          "required": [
+            "recipients"
+          ],
+          "properties": {
+            "recipients": {
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "sinkWriteRequest": {
+      "type": "object",
+      "required": [
+        "connectionId",
+        "target",
+        "mode",
+        "upsertKeys",
+        "records"
+      ],
+      "properties": {
+        "connectionId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "enum": [
+            "INSERT",
+            "UPSERT"
+          ]
+        },
+        "upsertKeys": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "records": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1000,
+          "items": {
+            "type": "object",
+            "minProperties": 1
+          }
+        },
+        "batchIndex": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "UPSERT"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "upsertKeys": {
+            "minItems": 1
+          }
         }
       }
     }

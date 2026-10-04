@@ -48,6 +48,9 @@ public final class MessagingNames {
     /** {@code data2flow.actions} 라우팅 키: Sink → {@value #QUEUE_ACTION_SINKS} */
     public static final String ROUTING_KEY_SINK = "sink";
 
+    /** 라이브 뷰 디버그 임시 큐 최대 길이(EVT-FLW-01: 넘으면 오래된 것부터 버림) */
+    public static final int DEBUG_QUEUE_MAX_LENGTH = 1000;
+
     /** 메시지 본문 공통 필드 */
     public static final String FIELD_MESSAGE_ID = "messageId";
     public static final String FIELD_SCHEMA_VERSION = "v";
@@ -58,6 +61,26 @@ public final class MessagingNames {
     /** 서비스 이벤트 큐 이름. 예: {@code eventsQueue("core")} → {@code core.events} */
     public static String eventsQueue(String service) {
         return service + EVENTS_QUEUE_SUFFIX;
+    }
+
+    /** 라이브 뷰 디버그 라우팅 키 {@code flow.{flowId}}({@code data2flow.debug} topic, EVT-FLW-01) */
+    public static String debugRoutingKey(String flowId) {
+        if (flowId == null || flowId.isBlank()) {
+            throw new IllegalArgumentException("flowId가 비어 있습니다");
+        }
+        return "flow." + flowId;
+    }
+
+    /**
+     * 라이브 뷰 디버그 임시 큐 선언 인자(core-api가 열린 편집기의 flowId만 바인딩, 손실 허용): classic, {@code x-max-length} 1000,
+     * {@code x-overflow=drop-head}. 큐는 exclusive·auto-delete로 선언한다.
+     */
+    public static java.util.Map<String, Object> debugQueueArguments() {
+        java.util.Map<String, Object> args = new java.util.LinkedHashMap<>();
+        args.put("x-queue-type", "classic");
+        args.put("x-max-length", DEBUG_QUEUE_MAX_LENGTH);
+        args.put("x-overflow", "drop-head");
+        return args;
     }
 
     /** DLQ 이름. 예: {@code action.commands.dlq} */

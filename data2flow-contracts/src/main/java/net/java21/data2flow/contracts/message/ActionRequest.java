@@ -7,6 +7,8 @@ import net.java21.data2flow.contracts.command.ActionKind;
 import net.java21.data2flow.contracts.command.CommandPayload;
 import net.java21.data2flow.contracts.command.CommandPriority;
 import net.java21.data2flow.contracts.command.CommandSource;
+import net.java21.data2flow.contracts.notification.NotificationRequest;
+import net.java21.data2flow.contracts.sink.SinkWriteRequest;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -88,6 +90,23 @@ public record ActionRequest(
                 MAPPER.readTree(MAPPER.writeValueAsBytes(payload)), clock);   // 받는 쪽과 같은 숫자 노드 타입
     }
 
+    /**
+     * 알림 요청(EVT-RUL-03, kind=NOTIFY → {@code action.notifications}). 우선순위는 출처로 정한다. core-api 알람 알림은
+     * {@code CommandSource.system()}(또는 RULE), 플로우 알림 노드는 FLOW 출처다.
+     */
+    public static ActionRequest notify(long organizationId, String idempotencyKey, CommandSource source,
+                                       Instant validUntil, NotificationRequest payload, Clock clock) {
+        return of(ActionKind.NOTIFY, organizationId, idempotencyKey, source, source.priority(), validUntil,
+                MAPPER.readTree(MAPPER.writeValueAsBytes(payload)), clock);
+    }
+
+    /** Sink 쓰기 요청(kind=SINK → {@code action.sinks}). 배치마다 하나, 멱등 키에 분할 인덱스를 넣는다(BR-FLW-13) */
+    public static ActionRequest sink(long organizationId, String idempotencyKey, CommandSource source,
+                                     Instant validUntil, SinkWriteRequest payload, Clock clock) {
+        return of(ActionKind.SINK, organizationId, idempotencyKey, source, source.priority(), validUntil,
+                MAPPER.readTree(MAPPER.writeValueAsBytes(payload)), clock);
+    }
+
     /** 일반 생성(장면·알림·Sink 등) */
     public static ActionRequest of(ActionKind kind, long organizationId, String idempotencyKey, CommandSource source,
                                    CommandPriority priority, Instant validUntil, JsonNode payload, Clock clock) {
@@ -111,6 +130,29 @@ public record ActionRequest(
             return MAPPER.treeToValue(payload, CommandPayload.class);
         } catch (JacksonException | IllegalArgumentException e) {
             throw new MessageFormatException("COMMAND payload를 읽을 수 없습니다: " + e.getMessage(), e);
+        }
+    }
+
+    /** kind=NOTIFY의 본문. 다른 종류이거나 모양이 틀리면 {@link MessageFormatException}(DLQ 대상) */
+    @JsonIgnore
+    public NotificationRequest notificationRequest() {
+        return payloadAs(ActionKind.NOTIFY, NotificationRequest.class);
+    }
+
+    /** kind=SINK의 본문. 다른 종류이거나 모양이 틀리면 {@link MessageFormatException}(DLQ 대상) */
+    @JsonIgnore
+    public SinkWriteRequest sinkWriteRequest() {
+        return payloadAs(ActionKind.SINK, SinkWriteRequest.class);
+    }
+
+    private <T> T payloadAs(ActionKind expected, Class<T> type) {
+        if (kind != expected) {
+            throw new MessageFormatException(expected + "가 아닌 행동 요청입니다: " + kind);
+        }
+        try {
+            return MAPPER.treeToValue(payload, type);
+        } catch (JacksonException | IllegalArgumentException e) {
+            throw new MessageFormatException(expected + " payload를 읽을 수 없습니다: " + e.getMessage(), e);
         }
     }
 

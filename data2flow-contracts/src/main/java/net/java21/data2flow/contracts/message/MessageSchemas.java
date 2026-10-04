@@ -33,6 +33,8 @@ public final class MessageSchemas {
     public static final String CAPABILITY_DEFINITION = "capability-definition.v1.json";
     /** 플로우 정의(FLW-api §5, flows.definition) */
     public static final String FLOW_DEFINITION = "flow-definition.v1.json";
+    /** 라이브 뷰 디버그 메시지(EVT-FLW-01, data2flow.debug) */
+    public static final String FLOW_DEBUG = "flow-debug.v1.json";
     /** 노드 카탈로그 항목(API-FLW-30, TC-FLW-031) */
     public static final String FLOW_NODE_TYPE = "flow-node-type.v1.json";
 

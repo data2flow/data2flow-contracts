@@ -97,7 +97,7 @@ class ActionRequestContractTest {
         assertThat(user.expiredAt(T.plusSeconds(99999))).isFalse();
         MessageSchemas.assertValid(user);
         ActionRequest notify = ActionRequest.of(ActionKind.NOTIFY, 1, "n-1", CommandSource.system(), CommandPriority.SAFETY, null,
-                codec.mapper().createObjectNode().put("alarmId", 5), CLOCK);
+                codec.mapper().createObjectNode().put("alarmId", 5).put("event", "alarm.raised").put("policyId", 3), CLOCK);
         assertThat(notify.routingKey()).isEqualTo("notify");
         assertThatThrownBy(notify::commandPayload).isInstanceOf(MessageFormatException.class).hasMessageContaining("NOTIFY");
         MessageSchemas.assertValid(notify);

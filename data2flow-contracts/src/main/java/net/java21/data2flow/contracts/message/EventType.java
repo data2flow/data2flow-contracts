@@ -2,6 +2,30 @@ package net.java21.data2flow.contracts.message;
 
 import net.java21.data2flow.contracts.command.CommandStatus;
 import net.java21.data2flow.contracts.message.event.AggregatesRecomputed;
+import net.java21.data2flow.contracts.message.event.AlarmSignal;
+import net.java21.data2flow.contracts.message.event.AlarmStateChanged;
+import net.java21.data2flow.contracts.message.event.NotificationDeliveryResult;
+import net.java21.data2flow.contracts.message.event.EmergencyStopChanged;
+import net.java21.data2flow.contracts.message.event.CommandNoEffect;
+import net.java21.data2flow.contracts.message.event.DriverCircuitChanged;
+import net.java21.data2flow.contracts.message.event.OscillationBlocked;
+import net.java21.data2flow.contracts.message.event.FlowPromoted;
+import net.java21.data2flow.contracts.message.event.MaintenanceChanged;
+import net.java21.data2flow.contracts.message.event.OpsAlarmChanged;
+import net.java21.data2flow.contracts.message.event.GatewayConnectivityChanged;
+import net.java21.data2flow.contracts.message.event.CalendarSynced;
+import net.java21.data2flow.contracts.message.event.SourceRotationProgress;
+import net.java21.data2flow.contracts.message.event.CredentialRevoked;
+import net.java21.data2flow.contracts.message.event.EdgeEvent;
+import net.java21.data2flow.contracts.message.event.ExportJobFinished;
+import net.java21.data2flow.contracts.message.event.ImportCompleted;
+import net.java21.data2flow.contracts.message.event.RetentionPurged;
+import net.java21.data2flow.contracts.message.event.BiExportFinished;
+import net.java21.data2flow.contracts.message.event.WorkOrderChanged;
+import net.java21.data2flow.contracts.message.event.SpaceModeChanged;
+import net.java21.data2flow.contracts.message.event.DeviceExportCompleted;
+import net.java21.data2flow.contracts.message.event.DeviceCommissioningChanged;
+import net.java21.data2flow.contracts.message.event.ReprocessJobFinished;
 import net.java21.data2flow.contracts.message.event.ClockSkewSuspected;
 import net.java21.data2flow.contracts.message.event.CommandStatusChanged;
 import net.java21.data2flow.contracts.message.event.ConnectorCatalogReported;
@@ -37,7 +61,8 @@ import java.util.stream.Collectors;
 /**
  * 도메인 이벤트 종류: {@code data2flow.events}(topic) 라우팅 키, 이벤트 ID, 페이로드 타입, 스키마 버전(architecture.md §4.5).
  *
- * <p>M2(수집 경로)와 M3(가상 폐루프: ACT·SIM·FLW)에서 쓰는 종류가 있다. 다음 마일스톤이 종류를 더할 때는 여기에 상수를 추가하고
+ * <p>M2(수집 경로), M3(가상 폐루프: ACT·SIM·FLW), M4(자동화 완성: RUL·ACT·FLW·OPS·DEV), M5(데이터 관리: DSC·TSD·DEV·ING)에서
+ * 쓰는 종류가 있다. 다음 마일스톤이 종류를 더할 때는 여기에 상수를 추가하고
  * {@code domain-event.v1.json}의 {@code $defs}에도 페이로드 스키마를 더한다(계약 테스트가 둘이 맞는지 확인한다).
  */
 public enum EventType {
@@ -96,7 +121,52 @@ public enum EventType {
     SIM_DATA_PURGED("sim.data.purged", "EVT-SIM-04", SimDataPurged.class),
 
     FLOW_APPLY_REPORTED("flow.apply.reported", "EVT-FLW-02", FlowApplyReported.class),
-    FLOW_STATE_CHANGED("flow.state.changed", "EVT-FLW-03", FlowStateChanged.class);
+    FLOW_STATE_CHANGED("flow.state.changed", "EVT-FLW-03", FlowStateChanged.class),
+
+    // M4 자동화 완성: 규칙·알람·알림(RUL), 비상 정지·효과·드라이버·진동(ACT), 승격(FLW), 운영(OPS), 게이트웨이(DEV)
+    ALARM_SIGNAL("alarm.signal", "EVT-RUL-01", AlarmSignal.class),
+    ALARM_RAISED("alarm.raised", "EVT-RUL-02", AlarmStateChanged.class),
+    ALARM_RERAISED("alarm.reraised", "EVT-RUL-02", AlarmStateChanged.class),
+    ALARM_ACKED("alarm.acked", "EVT-RUL-02", AlarmStateChanged.class),
+    ALARM_CLEARED("alarm.cleared", "EVT-RUL-02", AlarmStateChanged.class),
+    ALARM_FLAPPING("alarm.flapping", "EVT-RUL-02", AlarmStateChanged.class),
+    ALARM_SUPPRESSED("alarm.suppressed", "EVT-RUL-02", AlarmStateChanged.class),
+    NOTIFICATION_DELIVERED("notification.delivered", "EVT-RUL-04", NotificationDeliveryResult.class),
+    NOTIFICATION_FAILED("notification.failed", "EVT-RUL-04", NotificationDeliveryResult.class),
+    CONTROL_EMERGENCY_STARTED("control.emergency.started", "EVT-ACT-03", EmergencyStopChanged.class),
+    CONTROL_EMERGENCY_RELEASED("control.emergency.released", "EVT-ACT-03", EmergencyStopChanged.class),
+    COMMAND_NO_EFFECT("command.no-effect", "EVT-ACT-04", CommandNoEffect.class),
+    DRIVER_CIRCUIT_OPENED("driver.circuit.opened", "EVT-ACT-05", DriverCircuitChanged.class),
+    DRIVER_CIRCUIT_CLOSED("driver.circuit.closed", "EVT-ACT-05", DriverCircuitChanged.class),
+    CONTROL_OSCILLATION_BLOCKED("control.oscillation.blocked", "EVT-ACT-08", OscillationBlocked.class),
+    FLOW_PROMOTED("flow.promoted", "EVT-FLW-06", FlowPromoted.class),
+    OPS_ALARM_RAISED("ops.alarm.raised", "EVT-OPS-01", OpsAlarmChanged.class),
+    OPS_ALARM_CLEARED("ops.alarm.cleared", "EVT-OPS-01", OpsAlarmChanged.class),
+    OPS_MAINTENANCE_STARTED("ops.maintenance.started", "EVT-OPS-02", MaintenanceChanged.class),
+    OPS_MAINTENANCE_ENDED("ops.maintenance.ended", "EVT-OPS-02", MaintenanceChanged.class),
+    GATEWAY_CONNECTIVITY_CHANGED("gateway.connectivity.changed", "EVT-DEV-08", GatewayConnectivityChanged.class),
+
+    // M5 데이터 관리: 외부 맥락·자격증명·엣지(DSC), 내보내기·가져오기·보관(TSD), 작업 지시·운영 모드·설치(DEV), 재처리(ING)
+    CREDENTIAL_REVOKED("credential.revoked", "EVT-DSC-06", CredentialRevoked.class),
+    CALENDAR_SYNCED("calendar.synced", "EVT-DSC-07", CalendarSynced.class),
+    SOURCE_ROTATION_PROGRESS("source.rotation.progress", "EVT-DSC-08", SourceRotationProgress.class),
+    EDGE_STATUS_CHANGED("edge.status.changed", "EVT-DSC-10", EdgeEvent.class),
+    EDGE_CONFIG_APPLIED("edge.config.applied", "EVT-DSC-10", EdgeEvent.class),
+    EDGE_BUFFER_DROPPED("edge.buffer.dropped", "EVT-DSC-10", EdgeEvent.class),
+    EXPORT_COMPLETED("export.completed", "EVT-TSD-01", ExportJobFinished.class),
+    EXPORT_FAILED("export.failed", "EVT-TSD-01", ExportJobFinished.class),
+    IMPORT_COMPLETED("import.completed", "EVT-TSD-02", ImportCompleted.class),
+    RETENTION_PURGED("retention.purged", "EVT-TSD-04", RetentionPurged.class),
+    BI_EXPORT_COMPLETED("bi.export.completed", "EVT-TSD-07", BiExportFinished.class),
+    BI_EXPORT_FAILED("bi.export.failed", "EVT-TSD-07", BiExportFinished.class),
+    SPACE_MODE_CHANGED("space.mode.changed", "EVT-DEV-06", SpaceModeChanged.class),
+    WORKORDER_CHANGED("workorder.changed", "EVT-DEV-09", WorkOrderChanged.class),
+    DEVICE_EXPORT_COMPLETED("device.export.completed", "EVT-DEV-13", DeviceExportCompleted.class),
+    DEVICE_COMMISSIONING_CHANGED("device.commissioning.changed", "EVT-DEV-14", DeviceCommissioningChanged.class),
+    INGEST_REPROCESS_FINISHED("ingest.reprocess.finished", "EVT-ING-09", ReprocessJobFinished.class);
+
+    /** EVT-RUL-02 라우팅 키 접두사 */
+    public static final String ALARM_PREFIX = "alarm.";
 
     /** EVT-SIM-01 라우팅 키 접두사 */
     public static final String SIM_RUN_PREFIX = "sim.run.";
@@ -128,7 +198,7 @@ public enum EventType {
         return payloadType;
     }
 
-    /** 이 종류의 현재 스키마 버전. 모든 M2·M3 이벤트는 1 */
+    /** 이 종류의 현재 스키마 버전. 모든 이벤트는 1 */
     public int version() {
         return DomainEvent.VERSION;
     }
@@ -145,6 +215,19 @@ public enum EventType {
     public static EventType simRun(String event) {
         return fromRoutingKey(SIM_RUN_PREFIX + event)
                 .orElseThrow(() -> new IllegalArgumentException("모르는 실행 상태 이벤트입니다: " + event));
+    }
+
+    /**
+     * EVT-RUL-02 알람 상태 이벤트 종류. {@code event}는 라우팅 키 끝(raised, reraised, acked, cleared, flapping, suppressed).
+     * {@code signal}(EVT-RUL-01)은 상태 이벤트가 아니므로 거부한다
+     */
+    public static EventType alarmState(String event) {
+        EventType type = fromRoutingKey(ALARM_PREFIX + event)
+                .orElseThrow(() -> new IllegalArgumentException("모르는 알람 상태 이벤트입니다: " + event));
+        if (type == ALARM_SIGNAL) {
+            throw new IllegalArgumentException("alarm.signal은 상태 이벤트가 아닙니다");
+        }
+        return type;
     }
 
     /** 라우팅 키로 찾는다. 이 코드가 모르는 종류면 빈 값(소비자는 무시한다) */

@@ -91,7 +91,45 @@
     "sim.fault.ended": "simFaultLabel",
     "sim.data.purged": "simDataPurged",
     "flow.apply.reported": "flowApplyReported",
-    "flow.state.changed": "flowStateChanged"
+    "flow.state.changed": "flowStateChanged",
+    "alarm.signal": "alarmSignal",
+    "alarm.raised": "alarmStateChanged",
+    "alarm.reraised": "alarmStateChanged",
+    "alarm.acked": "alarmStateChanged",
+    "alarm.cleared": "alarmStateChanged",
+    "alarm.flapping": "alarmStateChanged",
+    "alarm.suppressed": "alarmStateChanged",
+    "notification.delivered": "notificationDeliveryResult",
+    "notification.failed": "notificationDeliveryResult",
+    "control.emergency.started": "emergencyStopChanged",
+    "control.emergency.released": "emergencyStopChanged",
+    "command.no-effect": "commandNoEffect",
+    "driver.circuit.opened": "driverCircuitChanged",
+    "driver.circuit.closed": "driverCircuitChanged",
+    "control.oscillation.blocked": "oscillationBlocked",
+    "flow.promoted": "flowPromoted",
+    "ops.alarm.raised": "opsAlarmChanged",
+    "ops.alarm.cleared": "opsAlarmChanged",
+    "ops.maintenance.started": "maintenanceChanged",
+    "ops.maintenance.ended": "maintenanceChanged",
+    "gateway.connectivity.changed": "gatewayConnectivityChanged",
+    "credential.revoked": "credentialRevoked",
+    "calendar.synced": "calendarSynced",
+    "source.rotation.progress": "sourceRotationProgress",
+    "edge.status.changed": "edgeEvent",
+    "edge.config.applied": "edgeEvent",
+    "edge.buffer.dropped": "edgeEvent",
+    "export.completed": "exportJobFinished",
+    "export.failed": "exportJobFinished",
+    "import.completed": "importCompleted",
+    "retention.purged": "retentionPurged",
+    "bi.export.completed": "biExportFinished",
+    "bi.export.failed": "biExportFinished",
+    "space.mode.changed": "spaceModeChanged",
+    "workorder.changed": "workOrderChanged",
+    "device.export.completed": "deviceExportCompleted",
+    "device.commissioning.changed": "deviceCommissioningChanged",
+    "ingest.reprocess.finished": "reprocessJobFinished"
   },
   "allOf": [
     {
@@ -1002,6 +1040,728 @@
         "properties": {
           "payload": {
             "$ref": "#/$defs/flowStateChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "alarm.signal"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/alarmSignal"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "alarm.raised"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/alarmStateChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "alarm.reraised"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/alarmStateChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "alarm.acked"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/alarmStateChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "alarm.cleared"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/alarmStateChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "alarm.flapping"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/alarmStateChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "alarm.suppressed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/alarmStateChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "notification.delivered"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/notificationDeliveryResult"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "notification.failed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/notificationDeliveryResult"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "control.emergency.started"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/emergencyStopChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "control.emergency.released"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/emergencyStopChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "command.no-effect"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/commandNoEffect"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "driver.circuit.opened"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/driverCircuitChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "driver.circuit.closed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/driverCircuitChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "control.oscillation.blocked"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/oscillationBlocked"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "flow.promoted"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/flowPromoted"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "ops.alarm.raised"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/opsAlarmChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "ops.alarm.cleared"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/opsAlarmChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "ops.maintenance.started"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/maintenanceChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "ops.maintenance.ended"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/maintenanceChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "gateway.connectivity.changed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/gatewayConnectivityChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "credential.revoked"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/credentialRevoked"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "calendar.synced"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/calendarSynced"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "source.rotation.progress"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/sourceRotationProgress"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "edge.status.changed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/edgeEvent"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "edge.config.applied"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/edgeEvent"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "edge.buffer.dropped"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/edgeEvent"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "export.completed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/exportJobFinished"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "export.failed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/exportJobFinished"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "import.completed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/importCompleted"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "retention.purged"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/retentionPurged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "bi.export.completed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/biExportFinished"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "bi.export.failed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/biExportFinished"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "space.mode.changed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/spaceModeChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "workorder.changed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/workOrderChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "device.export.completed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/deviceExportCompleted"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "device.commissioning.changed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/deviceCommissioningChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "ingest.reprocess.finished"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/reprocessJobFinished"
           }
         }
       }
@@ -2173,6 +2933,1259 @@
           }
         },
         "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "alarmSignal": {
+      "type": "object",
+      "required": [
+        "signal",
+        "alarmKey",
+        "sourceType",
+        "measuredAt"
+      ],
+      "properties": {
+        "signal": {
+          "enum": [
+            "RAISE",
+            "CLEAR"
+          ]
+        },
+        "alarmKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "sourceType": {
+          "enum": [
+            "RULE",
+            "FLOW",
+            "SYSTEM"
+          ]
+        },
+        "ruleId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "flowId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "flowVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "nodeId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": [
+            "CRITICAL",
+            "MAJOR",
+            "MINOR",
+            "WARNING",
+            "INFO"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "deviceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "spaceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "metric": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "value": {
+          "type": "number"
+        },
+        "threshold": {
+          "type": "object",
+          "properties": {
+            "raise": {
+              "type": "number"
+            },
+            "clear": {
+              "type": "number"
+            }
+          }
+        },
+        "measuredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "triggerMessageId": {
+          "type": "string"
+        }
+      },
+      "if": {
+        "properties": {
+          "signal": {
+            "const": "RAISE"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "severity",
+          "title"
+        ]
+      }
+    },
+    "alarmSnapshot": {
+      "type": "object",
+      "required": [
+        "id",
+        "severity",
+        "status",
+        "flapping",
+        "source",
+        "occurrenceCount",
+        "raisedAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "alarmKey": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "severity": {
+          "enum": [
+            "CRITICAL",
+            "MAJOR",
+            "MINOR",
+            "WARNING",
+            "INFO"
+          ]
+        },
+        "status": {
+          "enum": [
+            "ACTIVE",
+            "ACKNOWLEDGED",
+            "SUPPRESSED",
+            "CLEARED"
+          ]
+        },
+        "flapping": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "string"
+        },
+        "source": {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "RULE",
+                "FLOW",
+                "SYSTEM"
+              ]
+            },
+            "ruleId": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "flowId": {
+              "type": "string"
+            },
+            "nodeId": {
+              "type": "string"
+            }
+          }
+        },
+        "device": {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "space": {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "path": {
+              "type": "string"
+            }
+          }
+        },
+        "metric": {
+          "type": "string"
+        },
+        "triggerValue": {
+          "type": "number"
+        },
+        "peakValue": {
+          "type": "number"
+        },
+        "lastValue": {
+          "type": "number"
+        },
+        "occurrenceCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "raisedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastRaisedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ackedBy": {
+          "type": "object",
+          "required": [
+            "userId"
+          ],
+          "properties": {
+            "userId": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "ackedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "clearedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "clearReason": {
+          "enum": [
+            "AUTO",
+            "MANUAL",
+            "PARENT_CLEARED",
+            "RULE_DELETED",
+            "RULE_SCOPE_CHANGED"
+          ]
+        },
+        "assignee": {
+          "type": "object",
+          "required": [
+            "userId"
+          ],
+          "properties": {
+            "userId": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "parentAlarmId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "childCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "spaceEventId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "suppressedReason": {
+          "enum": [
+            "MAINTENANCE",
+            "PARENT",
+            "DEVICE_OFFLINE"
+          ]
+        }
+      }
+    },
+    "alarmStateChanged": {
+      "type": "object",
+      "required": [
+        "alarm",
+        "at"
+      ],
+      "properties": {
+        "alarm": {
+          "$ref": "#/$defs/alarmSnapshot"
+        },
+        "actor": {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "USER",
+                "SYSTEM",
+                "FLOW",
+                "MESSENGER"
+              ]
+            },
+            "id": {
+              "type": "string"
+            }
+          }
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "notificationDeliveryResult": {
+      "type": "object",
+      "required": [
+        "deliveryId",
+        "channel",
+        "status",
+        "attempts",
+        "at"
+      ],
+      "properties": {
+        "deliveryId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "alarmId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "channelId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "channel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recipient": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "SENT",
+            "FAILED"
+          ]
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "emergencyStopChanged": {
+      "type": "object",
+      "required": [
+        "id",
+        "scope",
+        "at"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "scope": {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "ORG",
+                "SPACE"
+              ]
+            },
+            "spaceId": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "includeChildren": {
+              "type": "boolean"
+            }
+          },
+          "if": {
+            "properties": {
+              "type": {
+                "const": "SPACE"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "spaceId"
+            ]
+          }
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "by": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "commandNoEffect": {
+      "type": "object",
+      "required": [
+        "commandId",
+        "deviceId",
+        "capability",
+        "expected",
+        "at"
+      ],
+      "properties": {
+        "commandId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "deviceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "spaceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected": {
+          "type": "object",
+          "required": [
+            "metric",
+            "direction",
+            "withinMinutes"
+          ],
+          "properties": {
+            "metric": {
+              "type": "string",
+              "minLength": 1
+            },
+            "direction": {
+              "enum": [
+                "up",
+                "down"
+              ]
+            },
+            "withinMinutes": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "observed": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "number"
+            },
+            "end": {
+              "type": "number"
+            },
+            "delta": {
+              "type": "number"
+            }
+          }
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "driverCircuitChanged": {
+      "type": "object",
+      "required": [
+        "driverId",
+        "type",
+        "failureRate",
+        "at"
+      ],
+      "properties": {
+        "driverId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failureRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "oscillationBlocked": {
+      "type": "object",
+      "required": [
+        "commandId",
+        "deviceId",
+        "capability",
+        "command",
+        "flips",
+        "windowSec",
+        "source",
+        "at"
+      ],
+      "properties": {
+        "commandId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "deviceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "spaceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "flips": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "windowSec": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source": {
+          "$ref": "#/$defs/commandSource"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "flowPromoted": {
+      "type": "object",
+      "required": [
+        "promotionId",
+        "pipelineId",
+        "snapshotId",
+        "fromStage",
+        "toStage",
+        "appliedVersions",
+        "at"
+      ],
+      "properties": {
+        "promotionId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pipelineId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "snapshotId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "fromStage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "toStage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approvedBy": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "appliedVersions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "opsAlarmChanged": {
+      "type": "object",
+      "required": [
+        "alarmId",
+        "key",
+        "severity",
+        "occurredAt"
+      ],
+      "properties": {
+        "alarmId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": [
+            "CRITICAL",
+            "MAJOR",
+            "MINOR",
+            "WARNING",
+            "INFO"
+          ]
+        },
+        "component": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "maintenanceChanged": {
+      "type": "object",
+      "required": [
+        "windowId",
+        "targetType",
+        "targetId",
+        "descendantSpaceIds",
+        "pauseAutomation",
+        "excludeFromAnalytics",
+        "startsAt"
+      ],
+      "properties": {
+        "windowId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "targetType": {
+          "enum": [
+            "SPACE",
+            "DEVICE"
+          ]
+        },
+        "targetId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "descendantSpaceIds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "pauseAutomation": {
+          "type": "boolean"
+        },
+        "excludeFromAnalytics": {
+          "type": "boolean"
+        },
+        "startsAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endsAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "gatewayConnectivityChanged": {
+      "type": "object",
+      "required": [
+        "gatewayId",
+        "gatewayEui",
+        "to"
+      ],
+      "properties": {
+        "gatewayId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "gatewayEui": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{16}$"
+        },
+        "from": {
+          "enum": [
+            "ONLINE",
+            "OFFLINE"
+          ]
+        },
+        "to": {
+          "enum": [
+            "ONLINE",
+            "OFFLINE"
+          ]
+        },
+        "lastSeenAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "credentialRevoked": {
+      "type": "object",
+      "required": [
+        "deviceId",
+        "credentialId",
+        "username"
+      ],
+      "properties": {
+        "deviceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "credentialId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "username": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "calendarSynced": {
+      "type": "object",
+      "required": [
+        "sourceId",
+        "events",
+        "removedUids"
+      ],
+      "properties": {
+        "sourceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "uid",
+              "startsOn",
+              "endsOn"
+            ],
+            "properties": {
+              "uid": {
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "startsOn": {
+                "type": "string",
+                "format": "date"
+              },
+              "endsOn": {
+                "type": "string",
+                "format": "date"
+              },
+              "startTime": {
+                "type": "string",
+                "pattern": "^\\d{2}:\\d{2}(:\\d{2}(\\.\\d+)?)?$"
+              },
+              "endTime": {
+                "type": "string",
+                "pattern": "^\\d{2}:\\d{2}(:\\d{2}(\\.\\d+)?)?$"
+              }
+            }
+          }
+        },
+        "removedUids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "sourceRotationProgress": {
+      "type": "object",
+      "required": [
+        "sourceId",
+        "rotationId",
+        "instanceId",
+        "ok"
+      ],
+      "properties": {
+        "sourceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rotationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "error": {
+          "type": "string"
+        }
+      }
+    },
+    "edgeEvent": {
+      "type": "object",
+      "required": [
+        "edgeId",
+        "at"
+      ],
+      "properties": {
+        "edgeId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "enum": [
+            "REGISTERING",
+            "ONLINE",
+            "OFFLINE",
+            "UPDATING",
+            "ERROR",
+            "REVOKED"
+          ]
+        },
+        "configVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "result": {
+          "enum": [
+            "PENDING",
+            "APPLIED",
+            "FAILED_ROLLED_BACK"
+          ]
+        },
+        "droppedItems": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "exportJobFinished": {
+      "type": "object",
+      "required": [
+        "jobId",
+        "status",
+        "rows"
+      ],
+      "properties": {
+        "jobId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requestedBy": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "enum": [
+            "COMPLETED",
+            "FAILED"
+          ]
+        },
+        "rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "downloadUrl": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      }
+    },
+    "importCompleted": {
+      "type": "object",
+      "required": [
+        "jobId",
+        "inserted",
+        "skipped",
+        "failed",
+        "deviceIds"
+      ],
+      "properties": {
+        "jobId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "inserted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deviceIds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "retentionPurged": {
+      "type": "object",
+      "required": [
+        "dataClass",
+        "rangeFrom",
+        "rangeTo",
+        "rows",
+        "archived"
+      ],
+      "properties": {
+        "dataClass": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rangeFrom": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rangeTo": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "archived": {
+          "type": "boolean"
+        }
+      }
+    },
+    "biExportFinished": {
+      "type": "object",
+      "required": [
+        "scheduleId",
+        "version",
+        "attempts"
+      ],
+      "properties": {
+        "scheduleId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "file": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "spaceModeChanged": {
+      "type": "object",
+      "required": [
+        "spaceId",
+        "to",
+        "at"
+      ],
+      "properties": {
+        "spaceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "from": {
+          "enum": [
+            "OCCUPIED",
+            "UNOCCUPIED",
+            "HOLIDAY",
+            "MAINTENANCE"
+          ]
+        },
+        "to": {
+          "enum": [
+            "OCCUPIED",
+            "UNOCCUPIED",
+            "HOLIDAY",
+            "MAINTENANCE"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "workOrderChanged": {
+      "type": "object",
+      "required": [
+        "workOrderId",
+        "type",
+        "to",
+        "deviceIds"
+      ],
+      "properties": {
+        "workOrderId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1
+        },
+        "deviceIds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "result": {
+          "type": "string"
+        },
+        "assigneeId": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "deviceExportCompleted": {
+      "type": "object",
+      "required": [
+        "jobId",
+        "format",
+        "status"
+      ],
+      "properties": {
+        "jobId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "format": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "COMPLETED",
+            "FAILED"
+          ]
+        },
+        "fileRef": {
+          "type": "string"
+        }
+      }
+    },
+    "deviceCommissioningChanged": {
+      "type": "object",
+      "required": [
+        "deviceId",
+        "status"
+      ],
+      "properties": {
+        "deviceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "firstSeenAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "checklist": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "reprocessJobFinished": {
+      "type": "object",
+      "required": [
+        "jobId",
+        "status",
+        "deviceIds",
+        "from",
+        "to",
+        "total",
+        "processed",
+        "failed",
+        "skipped",
+        "finishedAt"
+      ],
+      "properties": {
+        "jobId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "COMPLETED",
+            "FAILED",
+            "CANCELLED"
+          ]
+        },
+        "sourceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "deviceIds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "processed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requestedBy": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "error": {
+          "type": "string"
+        },
+        "finishedAt": {
           "type": "string",
           "format": "date-time"
         }
