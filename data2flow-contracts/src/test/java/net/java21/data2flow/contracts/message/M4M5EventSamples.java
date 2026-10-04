@@ -26,6 +26,7 @@ import net.java21.data2flow.contracts.message.event.ExportJobFinished;
 import net.java21.data2flow.contracts.message.event.FlowPromoted;
 import net.java21.data2flow.contracts.message.event.GatewayConnectivityChanged;
 import net.java21.data2flow.contracts.message.event.ImportCompleted;
+import net.java21.data2flow.contracts.message.event.LoRaWanDownlinkAck;
 import net.java21.data2flow.contracts.message.event.MaintenanceChanged;
 import net.java21.data2flow.contracts.message.event.NotificationDeliveryResult;
 import net.java21.data2flow.contracts.message.event.OpsAlarmChanged;
@@ -91,6 +92,8 @@ final class M4M5EventSamples {
         m.put(EventType.DRIVER_CIRCUIT_CLOSED, new DriverCircuitChanged(7, "MQTT", 0.0, T));
         m.put(EventType.CONTROL_OSCILLATION_BLOCKED, new OscillationBlocked(COMMAND_ID, 15, 31L, "Switch", "set", 3, 60,
                 CommandSource.flow("f-7f3a", 13, "n-act-1", "m-9"), T));
+        m.put(EventType.LORAWAN_DOWNLINK_ACK, LoRaWanDownlinkAck.ack(1, "24e124136d151606", "6f6b8a54-3c2e-4d1b-9a0f-2b7c1d0e5a11",
+                true, 7L, T));
         m.put(EventType.FLOW_PROMOTED, new FlowPromoted(4, 2, 11, "test", "prod", 1L, Map.of("f-7f3a", 14), T));
         m.put(EventType.OPS_ALARM_RAISED, new OpsAlarmChanged(77, "INGEST_ZERO", AlarmSeverity.CRITICAL, "pipeline", 0.0,
                 1.0, T));

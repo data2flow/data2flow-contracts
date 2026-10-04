@@ -592,6 +592,7 @@ for (SinkWriteRequest b : SinkWriteRequest.batches(connId, "room_temp", SinkMode
 | COMMAND_NO_EFFECT EVT-ACT-04 | `command.no-effect` | `CommandNoEffect` | action → flow·core |
 | DRIVER_CIRCUIT_OPENED·CLOSED EVT-ACT-05 | `driver.circuit.{opened\|closed}` | `DriverCircuitChanged` | action → core |
 | CONTROL_OSCILLATION_BLOCKED EVT-ACT-08 | `control.oscillation.blocked` | `OscillationBlocked` | action → core(WARNING 알람) |
+| LORAWAN_DOWNLINK_ACK EVT-ACT-09 | `lorawan.downlink.ack` | `LoRaWanDownlinkAck`(`kind` ACK·TXACK, 없으면 ACK) | ingress(ChirpStack `event/ack`·`event/txack` 구독) → action(`queueItemId`로 명령 찾기) |
 | FLOW_PROMOTED EVT-FLW-06 | `flow.promoted` | `FlowPromoted` | core → core·ai |
 | OPS_ALARM_RAISED·CLEARED EVT-OPS-01 | `ops.alarm.{raised\|cleared}` | `OpsAlarmChanged` | core → action·SSE |
 | OPS_MAINTENANCE_STARTED·ENDED EVT-OPS-02 | `ops.maintenance.{started\|ended}` | `MaintenanceChanged`(`covers(deviceId, spaceId)`) | core → flow·action·analytics |
@@ -639,4 +640,4 @@ for (SinkWriteRequest b : SinkWriteRequest.batches(connId, "room_temp", SinkMode
 
 ### 22.4 공유 픽스처 (M4·M5)
 
-`MessageFixtures.AUTOMATION_ACTION_REQUEST`(알람 알림·플로우 알림·Sink UPSERT), `AUTOMATION_EVENT`(알람 신호·발생·메신저 확인·알림 실패·비상 정지·효과 없음·진동 차단·유지보수·게이트웨이 오프라인), `DATA_MANAGEMENT_EVENT`(달력·재처리), `FLOW_DEBUG`(`flowDebug(name)`), `FLOW_TRACE`(`flowTrace(name)`, 웹 `trace.json`과 같은 모양). 생산자와 소비자가 같은 파일로 계약 테스트를 합니다.
+`MessageFixtures.AUTOMATION_ACTION_REQUEST`(알람 알림·플로우 알림·Sink UPSERT), `AUTOMATION_EVENT`(알람 신호·발생·메신저 확인·알림 실패·비상 정지·효과 없음·진동 차단·유지보수·게이트웨이 오프라인), `DATA_MANAGEMENT_EVENT`(달력·재처리), `DOWNLINK_EVENT`(LoRaWAN 다운링크 확인·미확인·게이트웨이 송신, EVT-ACT-09), `FLOW_DEBUG`(`flowDebug(name)`), `FLOW_TRACE`(`flowTrace(name)`, 웹 `trace.json`과 같은 모양). 생산자와 소비자가 같은 파일로 계약 테스트를 합니다.

@@ -1,0 +1,1 @@
+{"v":1,"messageId":"0b1e6f2a-7c3d-4e5f-8a9b-1c2d3e4f5a02","type":"lorawan.downlink.ack","organizationId":1,"occurredAt":"2026-10-04T03:22:05Z","payload":{"sourceId":1,"devEui":"24e124136d151606","queueItemId":"9a1c3e5f-0b2d-4f6a-8c0e-1a2b3c4d5e70","acknowledged":false,"fCntDown":8,"at":"2026-10-04T03:22:04Z","kind":"ACK"}}

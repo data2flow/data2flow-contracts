@@ -68,6 +68,13 @@ public final class MessageFixtures {
             "notification-failed", "control-emergency-started", "command-no-effect", "control-oscillation-blocked",
             "ops-maintenance-started", "gateway-offline");
 
+    /**
+     * LoRaWAN 다운링크 결과(EVT-ACT-09, ADR-054 남은 것 ①): 확인형 다운링크 기기 확인(ChirpStack {@code event/ack}), 기기가 확인하지 않음,
+     * 게이트웨이 송신(ChirpStack {@code event/txack}). ingress 생산자와 action 소비자가 같은 파일로 계약 테스트를 한다
+     */
+    public static final List<String> DOWNLINK_EVENT = List.of("lorawan-downlink-ack", "lorawan-downlink-not-acknowledged",
+            "lorawan-downlink-txack");
+
     /** M5 도메인 이벤트: 달력 동기화(EVT-DSC-07), 재처리 작업 끝(EVT-ING-09) */
     public static final List<String> DATA_MANAGEMENT_EVENT = List.of("calendar-synced", "ingest-reprocess-finished");
 

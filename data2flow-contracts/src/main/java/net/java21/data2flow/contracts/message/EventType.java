@@ -10,6 +10,7 @@ import net.java21.data2flow.contracts.message.event.CommandNoEffect;
 import net.java21.data2flow.contracts.message.event.DriverCircuitChanged;
 import net.java21.data2flow.contracts.message.event.OscillationBlocked;
 import net.java21.data2flow.contracts.message.event.FlowPromoted;
+import net.java21.data2flow.contracts.message.event.LoRaWanDownlinkAck;
 import net.java21.data2flow.contracts.message.event.MaintenanceChanged;
 import net.java21.data2flow.contracts.message.event.OpsAlarmChanged;
 import net.java21.data2flow.contracts.message.event.GatewayConnectivityChanged;
@@ -139,6 +140,7 @@ public enum EventType {
     DRIVER_CIRCUIT_OPENED("driver.circuit.opened", "EVT-ACT-05", DriverCircuitChanged.class),
     DRIVER_CIRCUIT_CLOSED("driver.circuit.closed", "EVT-ACT-05", DriverCircuitChanged.class),
     CONTROL_OSCILLATION_BLOCKED("control.oscillation.blocked", "EVT-ACT-08", OscillationBlocked.class),
+    LORAWAN_DOWNLINK_ACK("lorawan.downlink.ack", "EVT-ACT-09", LoRaWanDownlinkAck.class),
     FLOW_PROMOTED("flow.promoted", "EVT-FLW-06", FlowPromoted.class),
     OPS_ALARM_RAISED("ops.alarm.raised", "EVT-OPS-01", OpsAlarmChanged.class),
     OPS_ALARM_CLEARED("ops.alarm.cleared", "EVT-OPS-01", OpsAlarmChanged.class),

@@ -107,6 +107,7 @@
     "driver.circuit.opened": "driverCircuitChanged",
     "driver.circuit.closed": "driverCircuitChanged",
     "control.oscillation.blocked": "oscillationBlocked",
+    "lorawan.downlink.ack": "loRaWanDownlinkAck",
     "flow.promoted": "flowPromoted",
     "ops.alarm.raised": "opsAlarmChanged",
     "ops.alarm.cleared": "opsAlarmChanged",
@@ -1325,6 +1326,25 @@
         "properties": {
           "payload": {
             "$ref": "#/$defs/oscillationBlocked"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "lorawan.downlink.ack"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/loRaWanDownlinkAck"
           }
         }
       }
@@ -3521,6 +3541,49 @@
         "at": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "loRaWanDownlinkAck": {
+      "description": "EVT-ACT-09 ChirpStack v4 다운링크 결과(event/ack·event/txack). kind가 없으면 ACK, TXACK의 acknowledged는 항상 false",
+      "type": "object",
+      "required": [
+        "sourceId",
+        "devEui",
+        "queueItemId",
+        "acknowledged",
+        "at"
+      ],
+      "properties": {
+        "sourceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "devEui": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{16}$"
+        },
+        "queueItemId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "acknowledged": {
+          "type": "boolean"
+        },
+        "fCntDown": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "kind": {
+          "enum": [
+            "ACK",
+            "TXACK"
+          ]
         }
       }
     },

@@ -13,6 +13,7 @@ import net.java21.data2flow.contracts.message.event.CommandNoEffect;
 import net.java21.data2flow.contracts.message.event.DriverCircuitChanged;
 import net.java21.data2flow.contracts.message.event.EmergencyStopChanged;
 import net.java21.data2flow.contracts.message.event.EventPayload;
+import net.java21.data2flow.contracts.message.event.LoRaWanDownlinkAck;
 import net.java21.data2flow.contracts.message.event.MaintenanceChanged;
 import net.java21.data2flow.contracts.message.event.ReprocessJobFinished;
 import org.junit.jupiter.api.DisplayName;
@@ -167,5 +168,29 @@ class AutomationEventsTest {
         assertThat(tree.at("/payload/source/type").asString()).isEqualTo("FLOW");
         assertThat(EventType.CONTROL_OSCILLATION_BLOCKED.eventId()).isEqualTo("EVT-ACT-08");
         assertThat(AlarmKeys.system("OSCILLATION", "15", "Switch")).isEqualTo("system:OSCILLATION:15:Switch");
+    }
+
+    @Test
+    @DisplayName("ACT-03.03 ADR-054 ① EVT-ACT-09 lorawan.downlink.ack: 키 이름(fCntDown 등)·kind 없음은 ACK·TXACK는 확인 없음")
+    void loRaWanDownlinkAck() {
+        EventPayload p = M4M5EventSamples.all().get(EventType.LORAWAN_DOWNLINK_ACK);
+        JsonNode tree = codec.toTree(DomainEvent.of(EventType.LORAWAN_DOWNLINK_ACK, 1, p, null, CLOCK));
+        assertThat(tree.get("type").asString()).isEqualTo("lorawan.downlink.ack");
+        assertThat(tree.get("payload").propertyNames()).containsExactly("sourceId", "devEui", "queueItemId", "acknowledged",
+                "fCntDown", "at", "kind");
+        assertThat(EventType.LORAWAN_DOWNLINK_ACK.eventId()).isEqualTo("EVT-ACT-09");
+
+        LoRaWanDownlinkAck legacy = codec.mapper().readValue("""
+                {"sourceId":1,"devEui":"24e124136d151606","queueItemId":"q-1","acknowledged":true,"at":"2026-10-04T03:12:04Z",
+                 "future":1}""", LoRaWanDownlinkAck.class);
+        assertThat(legacy.kind()).isNull();
+        assertThat(legacy.effectiveKind()).isEqualTo(LoRaWanDownlinkAck.Kind.ACK);
+        assertThat(legacy.fCntDown()).isNull();
+        assertThat(codec.mapper().readValue("\"RXACK\"", LoRaWanDownlinkAck.Kind.class)).isEqualTo(LoRaWanDownlinkAck.Kind.UNKNOWN);
+        assertThat(LoRaWanDownlinkAck.txAck(1, "24e124136d151606", "q-1", 7L, T).acknowledged()).isFalse();
+        assertThatThrownBy(() -> new LoRaWanDownlinkAck(1, "24e124136d151606", "q-1", true, null, T, LoRaWanDownlinkAck.Kind.TXACK))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> LoRaWanDownlinkAck.ack(1, "24e124136d151606", " ", true, null, T))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

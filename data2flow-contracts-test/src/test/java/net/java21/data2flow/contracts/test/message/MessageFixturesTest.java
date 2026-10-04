@@ -183,8 +183,8 @@ class MessageFixturesTest {
     }
 
     static final List<String> AUTOMATION_ACTIONS = MessageFixtures.AUTOMATION_ACTION_REQUEST;
-    static final List<String> M4M5_EVENTS = java.util.stream.Stream.concat(MessageFixtures.AUTOMATION_EVENT.stream(),
-            MessageFixtures.DATA_MANAGEMENT_EVENT.stream()).toList();
+    static final List<String> M4M5_EVENTS = java.util.stream.Stream.of(MessageFixtures.AUTOMATION_EVENT,
+            MessageFixtures.DATA_MANAGEMENT_EVENT, MessageFixtures.DOWNLINK_EVENT).flatMap(List::stream).toList();
     static final List<String> DEBUG = MessageFixtures.FLOW_DEBUG;
 
     @ParameterizedTest
