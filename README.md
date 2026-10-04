@@ -1,6 +1,6 @@
 # data2flow-contracts
 
-data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비스를 만드는 백엔드 개발자가 읽습니다. 다 읽으면 서비스에 의존성을 넣고, 신원 필터·권한 검사(RoleChecker)·감사 기록·`Idempotency-Key`·`baseVersion`·호출 한도 응답·비밀값 암호화와 가림·ArchUnit 규칙을 연결하고, 수집 경로(M2)의 메시지 계약·디코더 SPI·커넥터 SPI와 계약 테스트 키트·메시지 추적 전파, 가상 폐루프(M3)의 기능(Capability) 카탈로그·명령 검증·상태 쌍·행동 요청·제어/시뮬레이터/플로우 이벤트, 사용자 JavaScript 샌드박스(`data2flow-script-sandbox`)를 쓸 수 있습니다.
+data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비스를 만드는 백엔드 개발자가 읽습니다. 다 읽으면 서비스에 의존성을 넣고, 신원 필터·권한 검사(RoleChecker)·감사 기록·`Idempotency-Key`·`baseVersion`·호출 한도 응답·비밀값 암호화와 가림·ArchUnit 규칙을 연결하고, 수집 경로(M2)의 메시지 계약·디코더 SPI·커넥터 SPI와 계약 테스트 키트·메시지 추적 전파, 가상 폐루프(M3)의 기능(Capability) 카탈로그·명령 검증·상태 쌍·행동 요청·제어/시뮬레이터/플로우 이벤트, 자동화 완성(M4)의 알람·알림·Sink 계약과 알림 채널 SPI·라이브 편집/라이브 뷰/추적 타입, 데이터 관리(M5)의 폴링 커서·리스·출력 연결·외부 맥락·라이선스 판정과 이벤트, 사용자 JavaScript 샌드박스(`data2flow-script-sandbox`)를 쓸 수 있습니다.
 
 규칙의 정본은 `data2flow-docs`의 `design/api-rules.md`(ADR-035), `design/auth.md` §7, `design/conventions.md` §3, `design/testing/backend.md` §6입니다. 이 문서는 그 규칙을 코드에서 어떻게 쓰는지만 설명합니다.
 
@@ -10,7 +10,7 @@ data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비�
 |---|---|---|
 | `data2flow-bom` | `import` | 공통 의존성 버전 목록. 서비스는 이 BOM을 import하고 버전 없이 이름만 씁니다 |
 | `data2flow-contracts` | `compile` | 공통 응답·오류·4개 언어 문구, 신원 헤더와 신원 필터, 권한표와 `RoleChecker`, 감사 기록 모양, `Idempotency-Key`, `baseVersion`, 목록 파라미터, 호출 한도 응답, 비밀값 암호화·가림, RabbitMQ 이름·라우팅 키·소비자 그룹, 메시지 계약(`RawEnvelope`·`CanonicalTelemetry`·`ConfigChangedMessage`·`DomainEvent`)과 JSON Schema, 디코더·커넥터 SPI, 메시지 추적 전파 |
-| `data2flow-contracts-test` | `test` | 테스트 키트: 공통 ArchUnit 규칙(조직 조건 강제, `Thread.sleep` 금지, 시스템 시계 직접 호출 금지), 커넥터 계약 테스트 키트, 공유 메시지 픽스처 |
+| `data2flow-contracts-test` | `test` | 테스트 키트: 공통 ArchUnit 규칙(조직 조건 강제, `Thread.sleep` 금지, 시스템 시계 직접 호출 금지), 커넥터 계약 테스트 키트(폴링 CURSOR 시나리오 포함), 알림 채널 계약 테스트 키트와 가짜 채널, 공유 메시지 픽스처 |
 | `data2flow-script-sandbox` | `compile`(pipeline·flow-engine만) | 사용자 JavaScript 샌드박스(GraalJS 커뮤니티판, ADR-008·046): 실행 격리, CPU 워치독, 반환값 변환, 머리말(`ctx.util`), 적응형 예열, 시간 초과 재시도. 패키지 `net.java21.data2flow.script.sandbox`. 사용법은 §20 |
 
 패키지(`net.java21.data2flow.contracts.*`)와 스펙의 대응은 아래와 같습니다.
@@ -32,9 +32,15 @@ data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비�
 | `message.event` | EVT-ACT·SIM·FLW(M3) | `CommandStatusChanged`, `DeviceStateChanged`, `DeviceCommandAck`, `DeviceStateReported`, `SimRunChanged`, `SimFaultLabel`, `SimDataPurged`, `FlowApplyReported`, `FlowStateChanged` |
 | `capability` | ACT-01.01~01.04·02.04·06.04 | `StandardCapabilities`, `CapabilityCatalog`, `CapabilityDefinition`, `CapabilityAttribute`, `CapabilityCommand`, `ExpectedEffect`, `AttributeConstraint`, `CommandArgsValidator`, `CommandValidation`, `ArgViolation`, `DeviceShadow`, `CapabilityStates`, `StateChange` |
 | `command` | ACT-02.01~02.05·FLW-05.02 | `CommandSource`, `SourceType`, `CommandPriority`, `CommandStatus`, `CommandStatusReasons`, `CommandTarget`, `CommandPayload`, `ActionKind`, `ActionIdempotencyKeys` |
-| `flow` | FLW-01.01·02(카탈로그) | `FlowDefinition`, `FlowNode`, `FlowNodeType` |
+| `flow` | FLW-01.01·02(카탈로그)·03.04·06.03 | `FlowDefinition`, `FlowNode`, `FlowNodeType`, `StatePolicy`, `FlowTrace` |
+| `alarm` | RUL-02 | `AlarmSeverity`, `AlarmStatus`, `AlarmSourceType`, `AlarmClearReason`, `SuppressedReason`, `AlarmKeys`, `AlarmSnapshot` |
+| `notification` | RUL-03·05, OPS-06.06 | `NotificationRequest`, `NotificationRecipient`, `NotificationEvents`, `DeliveryStatus`, `DeliverySkipReasons`, SPI `NotificationChannel`과 `ChannelCapabilities`·`ChannelSettings`·`ChannelMessage`·`ChannelButton`·`CallbackAction`·`CallbackCommand`·`InboundRequest`·`LinkRequest`·`LinkResult`·`SendResult` |
+| `sink` | FLW-04 | `SinkWriteRequest`, `SinkMode`, `SinkTypes` |
+| `output` | DSC-04.01 | `OutputConnectionType`, `OutputFormat`, `OutputFilter`, `OutputTopicTemplate`, `OutputFailureKind` |
+| `external` | DSC-06.01 | `KmaGrid` |
+| `license` | DSC-09.14 | `LicensePolicy` |
 | `message.decoder` | ING-02.01 | `PayloadDecoder`, `DecodedUplink`, `DecodedValue`, `DecodeException`, `DecoderKeys` |
-| `connector` | DSC-09.02 | `SourceConnector`, `ConnectorSession`, `RawSink`, `ConnectorDescriptor`, `ConnectorContext`, `SourceConfig`, `ConnectorStatus`, `ConnectionTestResult`, `ConnectorCatalogEntry`, `AckMode`, `ScalingMode` |
+| `connector` | DSC-09.02·09.09·09.10 | `SourceConnector`, `ConnectorSession`, `RawSink`, `ConnectorDescriptor`, `ConnectorContext`, `SourceConfig`, `ConnectorStatus`, `ConnectionTestResult`, `ConnectorCatalogEntry`, `AckMode`, `ScalingMode`, `PollCursor`, `PollCursorStore`, `ConnectorLease`, `LeaseLostException`, `PollingPolicy` |
 | `messaging` | ING-01.01·05.01·OPS-02.03·ACT-02.01 | `MessagingNames`, `SuperStreamSpec`, `QuorumQueueSpec`, `ConsumerGroups`, `StreamRoutingKeys`, `DedupKeys`, `ClientIds`, `MessageHeaders`, `MessageTracing` |
 
 ## 2. 빌드
@@ -542,3 +548,95 @@ if (!outcome.ok()) { /* outcome.failure().code() */ }
 - JaCoCo를 쓰는 서비스는 에이전트에서 `com.oracle.*`·`org.graalvm.*`를 빼야 합니다. 계측하면 해석 실행이 2배쯤 느려져 50ms 한도 시험이 운영과 다른 조건에서 돕니다.
 
 모듈 시험은 공격 코퍼스 42종(`src/test/resources/script-attacks/`: 호스트 접근 13·우회 8·프로토타입 오염 6·무한 루프 5·메모리 5·거대 출력 5), `ctx.util` 헬퍼, 워치독, 가상 스레드, 예열, 재시도, 라이선스 가드(`org.graalvm.polyglot:js` Oracle판이 클래스패스에 없음)를 확인합니다.
+
+## 21. 자동화 완성 계약 (M4: RUL·ACT·FLW·OPS-06, ADR-025·033·048)
+
+M4 서비스(flow-engine 라이브 편집·규칙, action 알림·Sink·인터락·비상 정지, core-api 알람)가 함께 쓰는 모양입니다. 서비스 로직(정책 평가, 묶음·재시도, 드라이버)은 각 서비스에 있고, 여기에는 메시지와 SPI만 있습니다.
+
+### 21.1 행동 요청: 알림·Sink (EVT-RUL-03, FLW-04)
+
+| kind | 본문 | 만드는 곳 | 큐 |
+|---|---|---|---|
+| NOTIFY | `NotificationRequest`(alarmId?·event·eventSeq·severity·policyId?·recipients[]·templateKeys·variables·aggregateWindowSec·aggregateKey·escalation·link·virtual) | core-api 알람 정책 평가, flow-engine `action.notify` | `action.notifications` |
+| SINK | `SinkWriteRequest`(connectionId·target·mode INSERT\|UPSERT·upsertKeys·records 1~1,000·batchIndex) | flow-engine `sink.database` | `action.sinks` |
+
+```java
+String key = ActionIdempotencyKeys.notifyRequest(alarmId, NotificationEvents.ALARM_RAISED, eventSeq, null);   // 단계가 있으면 stepNo
+ActionRequest req = ActionRequest.notify(orgId, key, CommandSource.system(), null,
+        NotificationRequest.forAlarm(alarmId, "alarm.raised", eventSeq, AlarmSeverity.MAJOR, recipients, templates, vars, 60, link), clock);
+NotificationRequest n = codec.read(body, ActionRequest.class).notificationRequest();     // action
+String deliveryKey = ActionIdempotencyKeys.notificationDelivery(alarmId, "alarm.raised", r.recipientKey(), "TELEGRAM", eventSeq);
+
+for (SinkWriteRequest b : SinkWriteRequest.batches(connId, "room_temp", SinkMode.UPSERT, List.of("device_id", "ts"), records, 100)) {
+    String k = ActionIdempotencyKeys.flow(flowId, nodeId, triggerMessageId, b.batchIndex() == null ? 0 : b.batchIndex());
+    outbox.insert(ActionRequest.sink(orgId, k, CommandSource.flow(flowId, ver, nodeId, triggerMessageId), null, b, clock));
+}
+```
+
+`recipients`가 비면 `policyId`가 있어야 하고(플로우 노드가 정책만 지정 → action이 수신자 계산), 묶기 창은 0 또는 60~600초입니다. Sink 레코드 키는 매핑을 적용한 대상 열 이름입니다. Sink 커넥터 SPI·계약 키트(TC-FLW-087)는 action에 있습니다.
+
+### 21.2 알림 채널 SPI (OPS-06.06, BR-OPS-32, ADR-033)
+
+`NotificationChannel`: `key()`·`available()`·`configSchema()`·`capabilities()`·`send(settings, ChannelMessage)` → `SendResult`(SUCCESS·TRANSIENT_FAILURE·PERMANENT_FAILURE, 예외 없음)·`verify(settings, InboundRequest)`·`handleCallback` → `CallbackCommand`(ACK·MUTE_30M·APPROVE·REJECT·LINK)·`link(LinkRequest)` → `LinkResult`. 공통 계층은 `ChannelMessage.adaptTo(capabilities)`로 버튼을 못 쓰는 채널에 버튼 대신 링크를 넣고 길이를 자릅니다. HTTP 응답 분류는 `SendResult.classifyHttpStatus`(408·425·429·5xx = 일시 실패)입니다.
+
+채널 구현은 테스트 키트의 `AbstractNotificationChannelContractTest`(TC-OPS-142)를 상속해 `channel()`·`settings()`·`peer()`(`ChannelTestPeer`: 다음 응답 지정, 콜백·연결 코드 요청 생성)·`recipientAddress()`를 채웁니다. 공통 계층 시험(TC-OPS-141)에는 `FakeNotificationChannel`(키 `FAKE`, 기본 `buttons=false`)을 SPI로 등록하세요.
+
+### 21.3 M4 도메인 이벤트 (`data2flow.events`)
+
+| 종류(`EventType`) | 라우팅 키 | 페이로드 | 생산 → 소비 |
+|---|---|---|---|
+| ALARM_SIGNAL EVT-RUL-01 | `alarm.signal` | `AlarmSignal`(RAISE·CLEAR, 키는 `AlarmKeys`) | flow-engine(아웃박스) → core |
+| `alarmState(e)` EVT-RUL-02 | `alarm.{raised\|reraised\|acked\|cleared\|flapping\|suppressed}` | `AlarmStateChanged`(`AlarmSnapshot` = API-RUL-10 Alarm, actor) | core → flow·core SSE·ai |
+| NOTIFICATION_DELIVERED·FAILED EVT-RUL-04 | `notification.{delivered\|failed}` | `NotificationDeliveryResult` | action → core |
+| CONTROL_EMERGENCY_STARTED·RELEASED EVT-ACT-03 | `control.emergency.{started\|released}` | `EmergencyStopChanged`(`Scope.blocks(priority)`·`covers(path)`) | core → 화면·flow·action |
+| COMMAND_NO_EFFECT EVT-ACT-04 | `command.no-effect` | `CommandNoEffect` | action → flow·core |
+| DRIVER_CIRCUIT_OPENED·CLOSED EVT-ACT-05 | `driver.circuit.{opened\|closed}` | `DriverCircuitChanged` | action → core |
+| CONTROL_OSCILLATION_BLOCKED EVT-ACT-08 | `control.oscillation.blocked` | `OscillationBlocked` | action → core(WARNING 알람) |
+| FLOW_PROMOTED EVT-FLW-06 | `flow.promoted` | `FlowPromoted` | core → core·ai |
+| OPS_ALARM_RAISED·CLEARED EVT-OPS-01 | `ops.alarm.{raised\|cleared}` | `OpsAlarmChanged` | core → action·SSE |
+| OPS_MAINTENANCE_STARTED·ENDED EVT-OPS-02 | `ops.maintenance.{started\|ended}` | `MaintenanceChanged`(`covers(deviceId, spaceId)`) | core → flow·action·analytics |
+| GATEWAY_CONNECTIVITY_CHANGED EVT-DEV-08 | `gateway.connectivity.changed` | `GatewayConnectivityChanged` | core → core 알람 |
+
+### 21.4 라이브 편집·라이브 뷰·추적 (FLW-03·06)
+
+- `StatePolicy`(KEEP·RESET·MIGRATE, 모르는 값은 RESET, `strictest`): 노드 종류의 상태 정책과 적용 전 검증 요약.
+- `FlowDebugMessage` v1(`flow-debug.v1.json`, EVT-FLW-01): topic `data2flow.debug`, 라우팅 키 `flow.{flowId}`. `node.stats`(노드별 1초 카운터)·`node.sample`(샘플, `masked`). core-api 임시 큐는 `MessagingNames.debugQueueArguments()`(x-max-length 1000, drop-head).
+- `FlowTrace`(API-FLW-41): 노드 순서·입출력·행동(kind·멱등 키·dryRun·skipped). 시험 실행 응답도 같은 모양입니다.
+- 설정 변경 `ConfigChangedMessage.EntityType`에 INTERLOCK·SINK_CONNECTION·NOTIFICATION_CHANNEL·NOTIFICATION_POLICY·NOTIFICATION_TEMPLATE·SILENCE·ON_CALL·NOTIFY_PREFERENCE·EDGE를 더했습니다(모르는 값은 UNKNOWN, 기존 소비자 영향 없음).
+- 추적(NFR-07.01): 텔레메트리 처리 스팬 안에서 `MessageTracing.startProducerSpan(EXCHANGE_ACTIONS, MessageHeaders.of(request))`로 행동 요청을 발행하면 action 소비 스팬이 같은 traceId를 잇습니다(`AutomationQueuesIT`).
+
+## 22. 데이터 관리 계약 (M5: DSC·ING·TSD·DEV)
+
+### 22.1 폴링·단일 실행 커넥터 (DSC-09.09·09.10, BR-DSC-24~26)
+
+확인 방식 CURSOR 커넥터(HTTP·Modbus·BACnet 폴링, OPC UA 읽기, 파일)는 `ConnectorContext.cursorStore()`(`PollCursorStore`)에서 `PollCursor`(cursor·pageToken)를 읽고, **`RawSink.write`가 모두 끝난 뒤에만** 저장합니다. ingress 구현은 `connector_leases`의 fencing token이 낮은 저장을 `LeaseLostException`으로 거부하고, 커넥터는 이 예외를 받으면 즉시 멈춥니다. 리스는 `ConnectorLease`(30초, 10초마다 갱신, 넘겨받을 때마다 토큰 +1), 폴링 규칙은 `PollingPolicy`(주기 10초 이상, 재시도 30초·2분·10분, 한도 80% 경고·100% 정지), MQTT 확장 방식은 `ScalingMode.forMqtt(version, shared)`입니다. Kafka·AMQP·NATS·Pub/Sub은 AFTER_WRITE(기록 뒤 커밋·ack), OPC UA 구독·BACnet COV는 NONE입니다(`AckMode` 설명).
+
+커넥터 계약 키트는 CURSOR 커넥터에 "재시작해도 저장된 위치부터 이어 읽어 같은 데이터를 두 번 넘기지 않는다"(TC-DSC-290)를 더 확인합니다. `cursorStore()`를 재정의해 `ContractPeer.acknowledgedCount()`가 저장된 위치를 돌려주게 하세요(`InMemoryPollCursorStore` 제공).
+
+### 22.2 출력 연결·외부 맥락·라이선스
+
+- 출력 연결(DSC-04.01): action은 `data2flow.telemetry`를 소비자 그룹 `ConsumerGroups.ACTION_OUTPUT`(`action-output`)으로 따로 읽고, `OutputFilter.select(telemetry, groupIds, spacePath)`로 거른 사본(`CanonicalTelemetry.withMetrics`)을 보냅니다. MQTT 토픽은 `OutputTopicTemplate.of("d2f/{spaceCode}/{deviceName}/{metric}")`(허용 변수 4개, 와일드카드 금지, 값의 `/`·`+`·`#`는 `_`). 연결 테스트 실패 종류는 `OutputFailureKind`.
+- 외부 맥락(DSC-06.01): `KmaGrid.toGrid(lat, lng)` → 동네예보 격자(nx, ny). 대기질·예약·LLM 파사드(`AirQualityProvider` 등, ADR-040)는 각 서비스에 있습니다.
+- 라이선스(DSC-09.14): `LicensePolicy.classify("EPL-2.0")` → CONDITIONAL, `violations(map)`이 비어 있어야 통과.
+
+### 22.3 M5 도메인 이벤트
+
+| 종류 | 라우팅 키 | 페이로드 |
+|---|---|---|
+| CREDENTIAL_REVOKED EVT-DSC-06 | `credential.revoked` | `CredentialRevoked` |
+| CALENDAR_SYNCED EVT-DSC-07 | `calendar.synced` | `CalendarSynced`(날짜 `yyyy-MM-dd`, 시각 `HH:mm:ss`) |
+| SOURCE_ROTATION_PROGRESS EVT-DSC-08 | `source.rotation.progress` | `SourceRotationProgress` |
+| EDGE_STATUS_CHANGED·CONFIG_APPLIED·BUFFER_DROPPED EVT-DSC-10 | `edge.{status.changed\|config.applied\|buffer.dropped}` | `EdgeEvent` |
+| EXPORT_COMPLETED·FAILED EVT-TSD-01 | `export.{completed\|failed}` | `ExportJobFinished` |
+| IMPORT_COMPLETED EVT-TSD-02 | `import.completed` | `ImportCompleted` |
+| RETENTION_PURGED EVT-TSD-04 | `retention.purged` | `RetentionPurged` |
+| BI_EXPORT_COMPLETED·FAILED EVT-TSD-07 | `bi.export.{completed\|failed}` | `BiExportFinished` |
+| SPACE_MODE_CHANGED EVT-DEV-06 | `space.mode.changed` | `SpaceModeChanged` |
+| WORKORDER_CHANGED EVT-DEV-09 | `workorder.changed` | `WorkOrderChanged` |
+| DEVICE_EXPORT_COMPLETED EVT-DEV-13 | `device.export.completed` | `DeviceExportCompleted` |
+| DEVICE_COMMISSIONING_CHANGED EVT-DEV-14 | `device.commissioning.changed` | `DeviceCommissioningChanged` |
+| INGEST_REPROCESS_FINISHED EVT-ING-09 | `ingest.reprocess.finished` | `ReprocessJobFinished` |
+
+### 22.4 공유 픽스처 (M4·M5)
+
+`MessageFixtures.AUTOMATION_ACTION_REQUEST`(알람 알림·플로우 알림·Sink UPSERT), `AUTOMATION_EVENT`(알람 신호·발생·메신저 확인·알림 실패·비상 정지·효과 없음·진동 차단·유지보수·게이트웨이 오프라인), `DATA_MANAGEMENT_EVENT`(달력·재처리), `FLOW_DEBUG`(`flowDebug(name)`), `FLOW_TRACE`(`flowTrace(name)`, 웹 `trace.json`과 같은 모양). 생산자와 소비자가 같은 파일로 계약 테스트를 합니다.
