@@ -1,0 +1,36 @@
+{
+  "v" : 1,
+  "messageId" : "0b8f6a52-3c1d-4e2f-9a7b-5c6d7e8f9a11",
+  "idempotencyKey" : "385035ed2e727829fdf4de2dfa9ecf1314d7d335f209fbe2a881c0e751d221b2",
+  "kind" : "NOTIFY",
+  "organizationId" : 1,
+  "createdAt" : "2026-07-15T05:08:00.120Z",
+  "source" : {
+    "type" : "SYSTEM"
+  },
+  "priority" : "SAFETY",
+  "payload" : {
+    "alarmId" : 9001,
+    "event" : "alarm.raised",
+    "eventSeq" : 1,
+    "severity" : "MAJOR",
+    "recipients" : [ {
+      "type" : "ON_CALL",
+      "channel" : "TELEGRAM"
+    }, {
+      "type" : "USER",
+      "id" : "5",
+      "channel" : "WEB"
+    } ],
+    "templateKeys" : {
+      "TELEGRAM" : "alarm.raised.default"
+    },
+    "variables" : {
+      "title" : "실습실 고온(27℃ 초과 5분)",
+      "space" : "실습실",
+      "value" : 27.6
+    },
+    "aggregateWindowSec" : 60,
+    "link" : "https://data2flow.java21.net/alarms/9001"
+  }
+}

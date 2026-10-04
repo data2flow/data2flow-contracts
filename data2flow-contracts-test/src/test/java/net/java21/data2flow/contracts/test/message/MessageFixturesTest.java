@@ -181,4 +181,54 @@ class MessageFixturesTest {
     private static int u16(byte[] b, int i) {
         return (b[i] & 0xff) | (b[i + 1] & 0xff) << 8;
     }
+
+    static final List<String> AUTOMATION_ACTIONS = MessageFixtures.AUTOMATION_ACTION_REQUEST;
+    static final List<String> M4M5_EVENTS = java.util.stream.Stream.concat(MessageFixtures.AUTOMATION_EVENT.stream(),
+            MessageFixtures.DATA_MANAGEMENT_EVENT.stream()).toList();
+    static final List<String> DEBUG = MessageFixtures.FLOW_DEBUG;
+
+    @ParameterizedTest
+    @FieldSource("AUTOMATION_ACTIONS")
+    @DisplayName("RUL-03.02 TC-RUL-081 · FLW-04.02 TC-FLW-058 알림·Sink 행동 요청 픽스처가 스키마를 통과하고 본문으로 손실 없이 읽힌다")
+    void automationActionFixtures(String name) {
+        MessageSchemas.assertValid(MessageSchemas.ACTION_REQUEST, codec.mapper().readTree(MessageFixtures.actionRequestJson(name)));
+        ActionRequest request = MessageFixtures.actionRequest(name);
+        assertThat(codec.read(codec.write(request), ActionRequest.class)).isEqualTo(request);
+        switch (request.kind()) {
+            case NOTIFY -> assertThat(request.notificationRequest().event()).isNotBlank();
+            case SINK -> assertThat(request.sinkWriteRequest().records()).isNotEmpty();
+            default -> throw new AssertionError("알림·Sink 픽스처가 아닙니다: " + request.kind());
+        }
+        assertThat(request.priority()).isEqualTo(request.source().priority());
+    }
+
+    @ParameterizedTest
+    @FieldSource("M4M5_EVENTS")
+    @DisplayName("RUL-02.01 · ACT-06.03 · DSC-06.04 M4·M5 도메인 이벤트 픽스처가 domain-event.v1.json을 통과하고 다시 써도 같은 값이다")
+    void m4m5EventFixtures(String name) {
+        byte[] json = MessageFixtures.domainEventJson(name);
+        MessageSchemas.assertValid(MessageSchemas.DOMAIN_EVENT, codec.mapper().readTree(json));
+        DomainEvent<? extends EventPayload> event = MessageFixtures.domainEvent(name);
+        assertThat(codec.mapper().readTree(codec.write(event))).isEqualTo(codec.mapper().readTree(json));
+    }
+
+    @ParameterizedTest
+    @FieldSource("DEBUG")
+    @DisplayName("FLW-03.01 TC-FLW-066 라이브 뷰 디버그 픽스처가 flow-debug.v1.json을 통과하고 라우팅 키는 flow.{flowId}")
+    void flowDebugFixtures(String name) {
+        MessageSchemas.assertValid(MessageSchemas.FLOW_DEBUG, codec.mapper().readTree(MessageFixtures.flowDebugJson(name)));
+        var m = MessageFixtures.flowDebug(name);
+        assertThat(m.routingKey()).isEqualTo("flow." + m.flowId());
+        assertThat(codec.read(codec.write(m), m.getClass())).isEqualTo(m);
+    }
+
+    @Test
+    @DisplayName("FLW-03.04 TC-FLW-071·072 실행 추적 픽스처: 노드 순서, 행동 멱등 키, 처리 버전")
+    void flowTraceFixture() {
+        var trace = MessageFixtures.flowTrace(MessageFixtures.FLOW_TRACE.getFirst());
+        assertThat(trace.steps()).extracting(s -> s.nodeId()).containsExactly("n-trg-1", "n-thr-1", "n-act-1");
+        assertThat(trace.steps().getLast().action().idempotencyKey()).hasSize(64);
+        assertThat(trace.version()).isEqualTo(13);
+        assertThat(trace.hasDryRunActions()).isFalse();
+    }
 }

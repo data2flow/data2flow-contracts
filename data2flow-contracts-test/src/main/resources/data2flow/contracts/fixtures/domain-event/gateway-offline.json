@@ -1,0 +1,1 @@
+{"v":1,"messageId":"5d0c7c1a-9a51-4c43-bf0e-0d6f2d6c4b28","type":"gateway.connectivity.changed","organizationId":1,"occurredAt":"2026-07-15T05:08:00Z","payload":{"gatewayId":2,"gatewayEui":"24e124fffef79304","from":"ONLINE","to":"OFFLINE","lastSeenAt":"2026-07-15T04:58:00Z"}}

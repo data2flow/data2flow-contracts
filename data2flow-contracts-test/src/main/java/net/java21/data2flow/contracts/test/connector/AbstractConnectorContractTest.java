@@ -8,6 +8,7 @@ import net.java21.data2flow.contracts.connector.ConnectorDescriptor;
 import net.java21.data2flow.contracts.connector.ConnectorSession;
 import net.java21.data2flow.contracts.connector.ConnectorState;
 import net.java21.data2flow.contracts.connector.ConnectorStatus;
+import net.java21.data2flow.contracts.connector.PollCursorStore;
 import net.java21.data2flow.contracts.connector.SourceConfig;
 import net.java21.data2flow.contracts.connector.SourceConnector;
 import net.java21.data2flow.contracts.message.RawEnvelope;
@@ -44,7 +45,9 @@ import static org.awaitility.Awaitility.await;
  *   <li>기록에 실패한 메시지는 확인하지 않고 다시 받아 결국 모두 기록한다(무손실)</li>
  *   <li>일시정지 동안은 넘기지 않고, 재개하면 멈춘 동안의 메시지까지 넘긴다</li>
  *   <li>상태를 보고하고, 닫으면 연결을 끊는다(두 번 닫아도 된다)</li>
+ *   <li>확인 방식이 CURSOR(폴링·파일)면 재시작해도 저장된 위치부터 이어 읽어 같은 데이터를 두 번 넘기지 않는다(DSC-09.09, BR-DSC-24)</li>
  * </ol>
+ * 폴링 커넥터는 {@link #cursorStore()}(기본 {@link InMemoryPollCursorStore})를 {@code ConnectorContext.cursorStore()}로 받는다.
  *
  * <pre>{@code
  * @Testcontainers
@@ -63,6 +66,7 @@ public abstract class AbstractConnectorContractTest {
 
     private RecordingRawSink sink;
     private ConnectorSession session;
+    private PollCursorStore cursors;
     private final List<ConnectorStatus> reported = new CopyOnWriteArrayList<>();
     private final String runId = UUID.randomUUID().toString().substring(0, 8);
     private int sequence;
@@ -95,10 +99,20 @@ public abstract class AbstractConnectorContractTest {
         return Clock.systemUTC();
     }
 
+    /** 폴링 위치 저장소. 테스트마다 새로 만든다(재시작 시나리오는 같은 저장소로 세션을 다시 연다) */
+    protected PollCursorStore cursorStore() {
+        return new InMemoryPollCursorStore();
+    }
+
     @BeforeEach
     void openSession() {
         sink = new RecordingRawSink();
-        session = connector().open(sourceConfig(), sink, new ConnectorContext(INSTANCE_ID, clock(), reported::add));
+        cursors = cursorStore();
+        session = connector().open(sourceConfig(), sink, context());
+    }
+
+    private ConnectorContext context() {
+        return new ConnectorContext(INSTANCE_ID, clock(), reported::add, cursors);
     }
 
     @AfterEach
@@ -226,6 +240,31 @@ public abstract class AbstractConnectorContractTest {
         session.close();
         assertThat(session.status().state()).isIn(ConnectorState.DISCONNECTED, ConnectorState.DISABLED);
         session.close();
+    }
+
+    @Test
+    @DisplayName("DSC-09.09 TC-DSC-290 BR-DSC-24 CURSOR 커넥터는 재시작해도 저장된 위치부터 이어 읽어 같은 데이터를 두 번 넘기지 않는다")
+    void cursorConnectorResumesWithoutDuplicates() throws Exception {
+        Assumptions.assumeTrue(connector().descriptor().ackMode() == AckMode.CURSOR, "폴링 위치를 쓰지 않는 커넥터");
+        startAndAwaitConnected();
+        long before = peer().acknowledgedCount();
+        List<byte[]> first = payloads(10);
+        peer().publish(first);
+        await().atMost(timeout()).until(() -> peer().acknowledgedCount() - before >= first.size());
+        assertThat(cursors.load(sourceConfig().sourceId())).as("저장된 폴링 위치").isPresent();
+        session.close();
+
+        List<byte[]> second = payloads(5);
+        peer().publish(second);
+        session = connector().open(sourceConfig(), sink, context());
+        startAndAwaitConnected();
+        Set<String> expected = asText(first);
+        expected.addAll(asText(second));
+        await().atMost(timeout()).until(() -> asText(sink.written().stream().map(RawEnvelope::payload).toList())
+                .containsAll(expected));
+        await().during(quietPeriod()).atMost(quietPeriod().plus(timeout()))
+                .until(() -> sink.writtenCount() == expected.size());
+        assertThat(sink.written()).as("같은 데이터를 두 번 넘김").hasSize(expected.size());
     }
 
     /** 세션을 시작하고 CONNECTED가 될 때까지 기다린다 */

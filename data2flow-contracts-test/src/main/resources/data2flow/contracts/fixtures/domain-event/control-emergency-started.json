@@ -1,0 +1,1 @@
+{"v":1,"messageId":"5d0c7c1a-9a51-4c43-bf0e-0d6f2d6c4b24","type":"control.emergency.started","organizationId":1,"occurredAt":"2026-07-15T05:08:00Z","requestId":"req-es-1","payload":{"id":3,"scope":{"type":"SPACE","spaceId":31,"includeChildren":true},"reason":"냉각수 누수 점검","by":1,"at":"2026-07-15T05:08:00Z"}}

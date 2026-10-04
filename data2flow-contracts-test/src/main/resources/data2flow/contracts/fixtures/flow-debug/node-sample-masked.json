@@ -1,0 +1,1 @@
+{"v":1,"messageId":"9a1b2c3d-0000-4000-8000-0000000000a2","type":"node.sample","flowId":"f-7f3a","instanceId":"data2flow-flow-engine-0","t":"2026-07-15T05:08:00Z","version":13,"sample":{"nodeId":"n-thr-1","messageId":"7f3a9c1e-2b4d-4f6a-8c0e-1a2b3c4d5e6f","direction":"out","port":"true","payload":{"deviceId":15,"spaceId":31,"metrics":{"temperature":27.6}},"masked":false}}

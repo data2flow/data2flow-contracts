@@ -1,0 +1,45 @@
+{
+  "messageId" : "7f3a9c1e-2b4d-4f6a-8c0e-1a2b3c4d5e6f",
+  "flowId" : "f-7f3a",
+  "version" : 13,
+  "startedAt" : "2026-07-15T05:08:00.120Z",
+  "steps" : [ {
+    "nodeId" : "n-trg-1",
+    "type" : "trigger.telemetry",
+    "inMs" : 0.0,
+    "durationMs" : 0.2,
+    "input" : {
+      "deviceId" : 15,
+      "metrics" : {
+        "temperature" : 27.6
+      }
+    },
+    "outputs" : [ {
+      "port" : "out"
+    } ]
+  }, {
+    "nodeId" : "n-thr-1",
+    "type" : "condition.threshold",
+    "inMs" : 0.2,
+    "durationMs" : 0.1,
+    "outputs" : [ {
+      "port" : "true"
+    } ]
+  }, {
+    "nodeId" : "n-act-1",
+    "type" : "action.control",
+    "inMs" : 0.3,
+    "durationMs" : 1.1,
+    "outputs" : [ {
+      "port" : "ok"
+    } ],
+    "action" : {
+      "kind" : "COMMAND",
+      "idempotencyKey" : "c2afc7496aa8ef5cad2351fdee791d4bc9d130dbd6aac407fc65abc2e340cefd",
+      "dryRun" : false,
+      "skipped" : null
+    }
+  } ],
+  "result" : "COMPLETED",
+  "error" : null
+}

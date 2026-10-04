@@ -1,8 +1,10 @@
 package net.java21.data2flow.contracts.test.message;
 
+import net.java21.data2flow.contracts.flow.FlowTrace;
 import net.java21.data2flow.contracts.message.ActionRequest;
 import net.java21.data2flow.contracts.message.CanonicalTelemetry;
 import net.java21.data2flow.contracts.message.DomainEvent;
+import net.java21.data2flow.contracts.message.FlowDebugMessage;
 import net.java21.data2flow.contracts.message.MessageCodec;
 import net.java21.data2flow.contracts.message.RawEnvelope;
 import net.java21.data2flow.contracts.message.event.EventPayload;
@@ -20,7 +22,8 @@ import java.util.Map;
  * <p>pipeline은 디코더 출력이 이 픽스처와 같은 모양인지, flow-engine·core-api(SSE)·analytics 소비자는 이 픽스처를 읽을 수 있는지
  * 계약 테스트에서 확인한다. 아카데미 실측 기기 6종(DEV-03.02: EM300-TH, EM320-TH, EM500-CO2, AM103, AM107, WS302)의 값을 담았다.
  * M3(가상 폐루프)의 행동 요청(TC-ACT-027: flow-engine 생산자와 action 소비자가 같은 픽스처)과 ACT·SIM 도메인 이벤트도 있다.
- * 파일은 {@code classpath:data2flow/contracts/fixtures/{canonical-telemetry|raw-envelope|action-request|domain-event}/{이름}.json}에 있다.
+ * M4(자동화)의 알림·Sink 행동 요청과 알람·제어·운영 이벤트, 라이브 뷰 디버그 메시지와 실행 추적, M5(데이터 관리) 이벤트도 있다.
+ * 파일은 {@code classpath:data2flow/contracts/fixtures/{canonical-telemetry|raw-envelope|action-request|domain-event|flow-debug|flow-trace}/{이름}.json}에 있다.
  */
 public final class MessageFixtures {
 
@@ -49,6 +52,30 @@ public final class MessageFixtures {
      */
     public static final List<String> DOMAIN_EVENT = List.of("device-command-ack-virtual", "device-state-reported-virtual",
             "command-status-applied", "sim-run-started", "sim-fault-started");
+
+    /**
+     * M4 행동 요청: 알람 알림(EVT-RUL-03, core-api → action, 당직 텔레그램 + 웹), 플로우 알림 노드(정책 ID만, TC-FLW-055),
+     * 플로우 Sink 노드 UPSERT 배치(TC-FLW-058)
+     */
+    public static final List<String> AUTOMATION_ACTION_REQUEST = List.of("alarm-notify-telegram", "flow-notify-policy",
+            "flow-sink-upsert");
+
+    /**
+     * M4 도메인 이벤트: 알람 발생 요청(EVT-RUL-01)·발생·메신저 확인(EVT-RUL-02), 알림 실패(EVT-RUL-04), 비상 정지(EVT-ACT-03),
+     * 효과 없음(EVT-ACT-04), 진동 차단(EVT-ACT-08), 유지보수 시작(EVT-OPS-02), 게이트웨이 오프라인(EVT-DEV-08)
+     */
+    public static final List<String> AUTOMATION_EVENT = List.of("alarm-signal-raise", "alarm-raised", "alarm-acked-messenger",
+            "notification-failed", "control-emergency-started", "command-no-effect", "control-oscillation-blocked",
+            "ops-maintenance-started", "gateway-offline");
+
+    /** M5 도메인 이벤트: 달력 동기화(EVT-DSC-07), 재처리 작업 끝(EVT-ING-09) */
+    public static final List<String> DATA_MANAGEMENT_EVENT = List.of("calendar-synced", "ingest-reprocess-finished");
+
+    /** 라이브 뷰 디버그 메시지(EVT-FLW-01): 노드 카운터, 샘플 */
+    public static final List<String> FLOW_DEBUG = List.of("node-stats", "node-sample-masked");
+
+    /** 실행 추적(API-FLW-41): "고온이면 냉방" 메시지 하나(웹 TC-FLW-072 {@code trace.json}과 같은 모양) */
+    public static final List<String> FLOW_TRACE = List.of("hot-then-cool");
 
     private static final MessageCodec CODEC = MessageCodec.create();
 
@@ -97,6 +124,22 @@ public final class MessageFixtures {
 
     public static DomainEvent<? extends EventPayload> domainEvent(String name) {
         return CODEC.readEvent(domainEventJson(name));
+    }
+
+    public static byte[] flowDebugJson(String name) {
+        return load("flow-debug/" + name + ".json");
+    }
+
+    public static FlowDebugMessage flowDebug(String name) {
+        return CODEC.read(flowDebugJson(name), FlowDebugMessage.class);
+    }
+
+    public static byte[] flowTraceJson(String name) {
+        return load("flow-trace/" + name + ".json");
+    }
+
+    public static FlowTrace flowTrace(String name) {
+        return CODEC.mapper().readValue(flowTraceJson(name), FlowTrace.class);
     }
 
     private static byte[] load(String path) {

@@ -1,0 +1,1 @@
+{"v":1,"messageId":"5d0c7c1a-9a51-4c43-bf0e-0d6f2d6c4b27","type":"ops.maintenance.started","organizationId":1,"occurredAt":"2026-07-15T05:08:00Z","payload":{"windowId":8,"targetType":"SPACE","targetId":31,"descendantSpaceIds":[32,33],"pauseAutomation":true,"excludeFromAnalytics":true,"startsAt":"2026-07-15T05:08:00Z","endsAt":"2026-07-15T07:08:00Z"}}

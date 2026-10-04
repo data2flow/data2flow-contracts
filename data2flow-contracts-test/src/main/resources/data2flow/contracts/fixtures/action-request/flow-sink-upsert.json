@@ -1,0 +1,36 @@
+{
+  "v" : 1,
+  "messageId" : "0b8f6a52-3c1d-4e2f-9a7b-5c6d7e8f9a13",
+  "idempotencyKey" : "f96a3f6e528770a1a79e971276ab614945cb1ad2b4b91bd5e62da6c09f0a0411",
+  "kind" : "SINK",
+  "organizationId" : 1,
+  "createdAt" : "2026-07-15T05:08:00.120Z",
+  "source" : {
+    "type" : "FLOW",
+    "flowId" : "f-archive",
+    "flowVersion" : 2,
+    "nodeId" : "n-sink-1",
+    "triggerMessageId" : "7f3a9c1e-2b4d-4f6a-8c0e-1a2b3c4d5e6f"
+  },
+  "priority" : "AUTO",
+  "payload" : {
+    "connectionId" : 4,
+    "target" : "room_temp",
+    "mode" : "UPSERT",
+    "upsertKeys" : [ "device_id", "ts" ],
+    "records" : [ {
+      "temperature" : 27.4,
+      "ts" : "2026-07-15T05:05:00Z",
+      "device_id" : 15
+    }, {
+      "temperature" : 27.5,
+      "ts" : "2026-07-15T05:06:00Z",
+      "device_id" : 15
+    }, {
+      "temperature" : 27.6,
+      "ts" : "2026-07-15T05:07:00Z",
+      "device_id" : 15
+    } ],
+    "batchIndex" : 0
+  }
+}
