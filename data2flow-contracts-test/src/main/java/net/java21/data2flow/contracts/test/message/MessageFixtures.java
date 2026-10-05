@@ -75,6 +75,19 @@ public final class MessageFixtures {
     public static final List<String> DOWNLINK_EVENT = List.of("lorawan-downlink-ack", "lorawan-downlink-not-acknowledged",
             "lorawan-downlink-txack");
 
+    /**
+     * M6 분석 이벤트(EVT-ANA-01~06). 생산자 data2flow-analytics(Python)의 실제 발행 코드 경로({@code RunRunner._publish_run},
+     * {@code RealtimeEngine._record}, 드리프트·일정 중지·내보내기)로 만든 봉투를 {@code RabbitPublisher}와 같은 방식
+     * ({@code json.dumps(…, ensure_ascii=False)})으로 쓴 바이트 그대로다(공백 포함, {@code requestId: null} 포함).
+     * 소비자(core-api·ai·flow-engine)는 이 파일로 계약 테스트를 한다
+     */
+    public static final List<String> ANALYTICS_EVENT = List.of("analytics-run-pending", "analytics-run-running", "analytics-run-succeeded",
+            "analytics-run-failed", "analytics-anomaly-detected", "analytics-eta-updated", "analytics-model-drift",
+            "analytics-schedule-stopped", "analytics-export-completed");
+
+    /** AI 이벤트: 사용량 한도 도달(EVT-AIA-03) 조직 한도·사용자 한도. ai 생산자와 core-api 소비자가 같은 파일로 계약 테스트를 한다 */
+    public static final List<String> AI_EVENT = List.of("ai-quota-exceeded-org", "ai-quota-exceeded-user");
+
     /** M5 도메인 이벤트: 달력 동기화(EVT-DSC-07), 재처리 작업 끝(EVT-ING-09) */
     public static final List<String> DATA_MANAGEMENT_EVENT = List.of("calendar-synced", "ingest-reprocess-finished");
 

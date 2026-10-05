@@ -29,6 +29,7 @@ data2flow 서비스들이 함께 쓰는 계약 라이브러리입니다. 서비�
 | `error` | OPS-12.01 | `ErrorCode`, `CommonErrorCode`(공통 코드 19개), `BusinessException` |
 | `message` | ING-01.01·02.01·05.01·ACT-02.01 | `Message`, `@MessageSchema`, `MessageCodec`, `MessageSchemas`, `RawEnvelope`, `CanonicalTelemetry`, `ConfigChangedMessage`, `DomainEvent`, `EventType`, `SourceTypes`, `Quality`, `ActionRequest` |
 | `message.event` | EVT-DEV·DSC·ING·TSD(M2) | `DeviceChanged`, `DeviceConnectivityChanged`, `DevicePendingCreated`, `SpaceChanged`, `GroupMembershipChanged`, `SourceRuntimeReported`, `SourceStatsReported`, `SourceConnectionChanged`, `SourceDataActivity`, `ConnectorCatalogReported`, `MetricUnverifiedRegistered`, `IngestAlert`, `IngestGapDetected`, `ClockSkewSuspected`, `AggregatesRecomputed`, `PartitionWarning` |
+| `message.event` | EVT-ANA·AIA(M6) | `AnalyticsRunStatusChanged`, `AnalyticsAnomalyDetected`, `AnalyticsEtaUpdated`, `AnalyticsModelDrift`, `AnalyticsScheduleStopped`, `AnalyticsExportCompleted`, `AiQuotaExceeded` |
 | `message.event` | EVT-ACT·SIM·FLW(M3) | `CommandStatusChanged`, `DeviceStateChanged`, `DeviceCommandAck`, `DeviceStateReported`, `SimRunChanged`, `SimFaultLabel`, `SimDataPurged`, `FlowApplyReported`, `FlowStateChanged` |
 | `capability` | ACT-01.01~01.04·02.04·06.04 | `StandardCapabilities`, `CapabilityCatalog`, `CapabilityDefinition`, `CapabilityAttribute`, `CapabilityCommand`, `ExpectedEffect`, `AttributeConstraint`, `CommandArgsValidator`, `CommandValidation`, `ArgViolation`, `DeviceShadow`, `CapabilityStates`, `StateChange` |
 | `command` | ACT-02.01~02.05·FLW-05.02 | `CommandSource`, `SourceType`, `CommandPriority`, `CommandStatus`, `CommandStatusReasons`, `CommandTarget`, `CommandPayload`, `ActionKind`, `ActionIdempotencyKeys` |
@@ -125,12 +126,19 @@ PermissionLookup permissionLookup(UserRoleQueryRepository roles) {
             .orElse(AccessGrant.none());   // 없는 사용자·비활성·다른 조직 → 기본 거부
 }
 
-// 그 밖의 서비스: core 내부 API로 묻고 10초 이내로만 캐시한다(BR-IAM-13)
+// 그 밖의 서비스: core 내부 API로 묻고 10초 이내로만 캐시한다(BR-IAM-13).
+// 장기 토큰 요청은 토큰 ID까지 넘겨 core access-grant ?accessTokenId=로 판정한다(IAM-05·IAM-04.07)
 @Bean
 PermissionLookup permissionLookup(CoreInternalClient core, Clock clock) {
-    return new CachingPermissionLookup(core::findAccessGrant, Duration.ofSeconds(10), clock);
+    // core.findAccessGrant(long organizationId, long userId, Long accessTokenId) — 웹 신원이면 accessTokenId=null
+    return new CachingPermissionLookup(PermissionLookup.tokenAware(core::findAccessGrant), Duration.ofSeconds(10), clock);
 }
 ```
+
+**웹 신원과 장기 토큰 신원은 권한이 다릅니다.** 같은 사용자라도 장기 토큰(`X-ACCESS-TOKEN-ID`)의 권한은 소유자 권한 ∩ 토큰 범위·공간이고,
+서비스 계정 토큰은 범위 권한뿐입니다. 그래서 `RoleChecker`는 `PermissionLookup.find(organizationId, userId, accessTokenId)`(3인자)를 부르고,
+`CachingPermissionLookup`의 캐시 키는 조직·사용자·토큰 ID(웹이면 웹 구분값)입니다(IAM-05.01). 토큰을 모르는 이전 2인자 람다도 그대로
+쓸 수 있지만, 그때는 토큰 공간 범위가 적용되지 않으므로 core를 묻는 서비스는 `tokenAware`로 바꿉니다. `evict(org, user)`는 그 사용자의 웹·토큰 칸을 모두 지웁니다.
 
 `AuditRecorder` 빈도 주면 403 거부가 감사 `ACCESS_DENIED`(result=DENIED, detail.permission)로 남습니다.
 
@@ -637,6 +645,25 @@ for (SinkWriteRequest b : SinkWriteRequest.batches(connId, "room_temp", SinkMode
 | DEVICE_EXPORT_COMPLETED EVT-DEV-13 | `device.export.completed` | `DeviceExportCompleted` |
 | DEVICE_COMMISSIONING_CHANGED EVT-DEV-14 | `device.commissioning.changed` | `DeviceCommissioningChanged` |
 | INGEST_REPROCESS_FINISHED EVT-ING-09 | `ingest.reprocess.finished` | `ReprocessJobFinished` |
+
+### 22.3.1 M6 분석·AI 이벤트 (ANA·AIA)
+
+analytics 이벤트의 생산자는 Python(`data2flow-analytics`)입니다. 페이로드 레코드는 analytics가 실제로 보내는 JSON과 같은 모양입니다:
+ID는 문자열(`…AsLong()`으로 숫자), `analytics.run.*`의 `progress`·`stage`와 내보내기의 `userId`는 값이 없어도 `null`로 실리고,
+문서 필드 밖에 analytics가 더 싣는 값(`stage`, ETA의 `occurredAt`·`value`, 내보내기의 `exportId`)도 필드로 둡니다.
+
+| 종류 | 라우팅 키 | 페이로드 | 생산 → 소비 |
+|---|---|---|---|
+| `analyticsRun(status)` EVT-ANA-01 | `analytics.run.{queued\|pending\|running\|succeeded\|failed\|timeout\|cancelled}` (`ANALYTICS_RUN_PREFIX`) | `AnalyticsRunStatusChanged` | analytics → core(색인·SSE)·ai(자동 해설) |
+| ANALYTICS_ANOMALY_DETECTED EVT-ANA-02 | `analytics.anomaly.detected` | `AnalyticsAnomalyDetected`(`Evidence`) | analytics → flow·core |
+| ANALYTICS_ETA_UPDATED EVT-ANA-03 | `analytics.eta.updated` | `AnalyticsEtaUpdated` | analytics → flow·core |
+| ANALYTICS_MODEL_DRIFT EVT-ANA-04 | `analytics.model.drift` | `AnalyticsModelDrift` | analytics → core |
+| ANALYTICS_SCHEDULE_STOPPED EVT-ANA-05 | `analytics.schedule.stopped` | `AnalyticsScheduleStopped` | analytics → core |
+| ANALYTICS_EXPORT_COMPLETED EVT-ANA-06 | `analytics.export.completed` | `AnalyticsExportCompleted` | analytics → core |
+| AI_QUOTA_EXCEEDED EVT-AIA-03 | `ai.quota.exceeded` | `AiQuotaExceeded`(`organization(…)`·`user(…)`) | ai(같은 한도 하루 한 번) → core(관리자 알림 센터) |
+
+공유 픽스처 `MessageFixtures.ANALYTICS_EVENT`(9건)는 analytics 발행 코드 경로로 만든 바이트 그대로(Python `json.dumps` 공백, `requestId: null` 포함)이고,
+`AI_EVENT`(조직·사용자 한도 2건)도 있습니다. 계약 테스트는 페이로드를 다시 쓴 결과가 보낸 페이로드와 같은 바이트(정규형)인지 확인합니다.
 
 ### 22.4 공유 픽스처 (M4·M5)
 

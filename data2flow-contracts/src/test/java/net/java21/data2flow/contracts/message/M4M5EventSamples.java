@@ -9,7 +9,14 @@ import net.java21.data2flow.contracts.alarm.AlarmStatus;
 import net.java21.data2flow.contracts.alarm.SuppressedReason;
 import net.java21.data2flow.contracts.capability.ExpectedEffect;
 import net.java21.data2flow.contracts.command.CommandSource;
+import net.java21.data2flow.contracts.message.event.AiQuotaExceeded;
 import net.java21.data2flow.contracts.message.event.AlarmSignal;
+import net.java21.data2flow.contracts.message.event.AnalyticsAnomalyDetected;
+import net.java21.data2flow.contracts.message.event.AnalyticsEtaUpdated;
+import net.java21.data2flow.contracts.message.event.AnalyticsExportCompleted;
+import net.java21.data2flow.contracts.message.event.AnalyticsModelDrift;
+import net.java21.data2flow.contracts.message.event.AnalyticsRunStatusChanged;
+import net.java21.data2flow.contracts.message.event.AnalyticsScheduleStopped;
 import net.java21.data2flow.contracts.message.event.AlarmStateChanged;
 import net.java21.data2flow.contracts.message.event.BiExportFinished;
 import net.java21.data2flow.contracts.message.event.CalendarSynced;
@@ -132,6 +139,24 @@ final class M4M5EventSamples {
                 Map.of("firstSeen", true, "space", true)));
         m.put(EventType.INGEST_REPROCESS_FINISHED, new ReprocessJobFinished("rp-1", ReprocessJobFinished.Status.COMPLETED, 3L,
                 List.of(), T.minusSeconds(7 * 86_400L), T, 10_080, 10_075, 0, 5, 5L, null, T));
+        // M6 분석(ANA)·AI(AIA)
+        for (AnalyticsRunStatusChanged.Status status : AnalyticsRunStatusChanged.Status.values()) {
+            if (status != AnalyticsRunStatusChanged.Status.UNKNOWN) {
+                m.put(EventType.analyticsRun(status), new AnalyticsRunStatusChanged("41", "12", status, status.terminal() ? 100 : null,
+                        AnalyticsRunStatusChanged.Trigger.MANUAL, null, status == AnalyticsRunStatusChanged.Status.FAILED ? "INTERNAL_ERROR" : null,
+                        status.terminal() ? T : null));
+            }
+        }
+        m.put(EventType.ANALYTICS_ANOMALY_DETECTED, new AnalyticsAnomalyDetected("12", "101", "co2", T, 1500.0, 6.2154,
+                AnalyticsAnomalyDetected.Kind.SPIKE, new AnalyticsAnomalyDetected.Evidence(612.4, 4.5,
+                List.of(new AnalyticsAnomalyDetected.Contributor("target", 1.0)))));
+        m.put(EventType.ANALYTICS_ETA_UPDATED, new AnalyticsEtaUpdated("12", "101", "co2", 1000.0, AnalyticsEtaUpdated.Direction.UP,
+                T.plusSeconds(615), 10.25, AnalyticsEtaUpdated.Confidence.HIGH, T, 940.0));
+        m.put(EventType.ANALYTICS_MODEL_DRIFT, new AnalyticsModelDrift("12", "3", 0.312346, T));
+        m.put(EventType.ANALYTICS_SCHEDULE_STOPPED, new AnalyticsScheduleStopped("12", "7", 3));
+        m.put(EventType.ANALYTICS_EXPORT_COMPLETED, new AnalyticsExportCompleted("9", "7", "/bff/download/ana-41-9", T.plusSeconds(86_400),
+                "ana-41-9"));
+        m.put(EventType.AI_QUOTA_EXCEEDED, AiQuotaExceeded.user(7, AiQuotaExceeded.LimitType.REQUESTS, T.plusSeconds(3600)));
         return m;
     }
 }

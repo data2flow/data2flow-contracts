@@ -231,4 +231,29 @@ class MessageFixturesTest {
         assertThat(trace.version()).isEqualTo(13);
         assertThat(trace.hasDryRunActions()).isFalse();
     }
+
+    static final List<String> M6_EVENTS = java.util.stream.Stream.of(MessageFixtures.ANALYTICS_EVENT, MessageFixtures.AI_EVENT)
+            .flatMap(List::stream).toList();
+
+    @ParameterizedTest
+    @FieldSource("M6_EVENTS")
+    @DisplayName("ANA-06.02 TC-ANA-140 · AIA-07.04 analytics(Python)·ai 이벤트 픽스처: 스키마 통과, 타입으로 읽히고 다시 쓴 페이로드가 보낸 바이트와 같다")
+    void m6EventFixtures(String name) {
+        byte[] json = MessageFixtures.domainEventJson(name);
+        JsonNode sent = codec.mapper().readTree(json);
+        MessageSchemas.assertValid(MessageSchemas.DOMAIN_EVENT, sent);
+        DomainEvent<? extends EventPayload> event = MessageFixtures.domainEvent(name);
+        assertThat(event.eventType().routingKey()).isEqualTo(sent.get("type").asString());
+        assertThat(event.payload()).isInstanceOf(event.eventType().payloadType());
+        // 페이로드: 키 순서·null 키·숫자 표기까지 같은 바이트(공백 없는 정규형으로 비교)
+        JsonNode written = codec.toTree(event);
+        assertThat(written.get("payload").toString()).isEqualTo(sent.get("payload").toString());
+        // 봉투: Python은 requestId가 없으면 null로 싣고 Java는 생략한다(둘 다 스키마 통과, 소비자는 같게 읽는다)
+        tools.jackson.databind.node.ObjectNode envelope = ((tools.jackson.databind.node.ObjectNode) sent).deepCopy();
+        if (envelope.get("requestId") != null && envelope.get("requestId").isNull()) {
+            envelope.remove("requestId");
+        }
+        assertThat(written).isEqualTo(envelope);
+        assertThat(codec.readEvent(codec.write(event))).isEqualTo(event);
+    }
 }

@@ -130,7 +130,20 @@
     "workorder.changed": "workOrderChanged",
     "device.export.completed": "deviceExportCompleted",
     "device.commissioning.changed": "deviceCommissioningChanged",
-    "ingest.reprocess.finished": "reprocessJobFinished"
+    "ingest.reprocess.finished": "reprocessJobFinished",
+    "analytics.run.queued": "analyticsRunStatusChanged",
+    "analytics.run.pending": "analyticsRunStatusChanged",
+    "analytics.run.running": "analyticsRunStatusChanged",
+    "analytics.run.succeeded": "analyticsRunStatusChanged",
+    "analytics.run.failed": "analyticsRunStatusChanged",
+    "analytics.run.timeout": "analyticsRunStatusChanged",
+    "analytics.run.cancelled": "analyticsRunStatusChanged",
+    "analytics.anomaly.detected": "analyticsAnomalyDetected",
+    "analytics.eta.updated": "analyticsEtaUpdated",
+    "analytics.model.drift": "analyticsModelDrift",
+    "analytics.schedule.stopped": "analyticsScheduleStopped",
+    "analytics.export.completed": "analyticsExportCompleted",
+    "ai.quota.exceeded": "aiQuotaExceeded"
   },
   "allOf": [
     {
@@ -1782,6 +1795,253 @@
         "properties": {
           "payload": {
             "$ref": "#/$defs/reprocessJobFinished"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "analytics.run.queued"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/analyticsRunStatusChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "analytics.run.pending"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/analyticsRunStatusChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "analytics.run.running"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/analyticsRunStatusChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "analytics.run.succeeded"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/analyticsRunStatusChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "analytics.run.failed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/analyticsRunStatusChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "analytics.run.timeout"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/analyticsRunStatusChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "analytics.run.cancelled"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/analyticsRunStatusChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "analytics.anomaly.detected"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/analyticsAnomalyDetected"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "analytics.eta.updated"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/analyticsEtaUpdated"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "analytics.model.drift"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/analyticsModelDrift"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "analytics.schedule.stopped"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/analyticsScheduleStopped"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "analytics.export.completed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/analyticsExportCompleted"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "ai.quota.exceeded"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/aiQuotaExceeded"
           }
         }
       }
@@ -4251,6 +4511,343 @@
         "finishedAt": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "analyticsRunStatusChanged": {
+      "description": "EVT-ANA-01 분석 실행 상태(생산 data2flow-analytics). ID는 문자열, progress·stage는 늘 실린다(null 가능)",
+      "type": "object",
+      "required": [
+        "runId",
+        "analysisId",
+        "status",
+        "trigger"
+      ],
+      "properties": {
+        "runId": {
+          "type": "string",
+          "pattern": "^[0-9]{1,19}$"
+        },
+        "analysisId": {
+          "type": "string",
+          "pattern": "^[0-9]{1,19}$"
+        },
+        "status": {
+          "enum": [
+            "QUEUED",
+            "PENDING",
+            "RUNNING",
+            "SUCCEEDED",
+            "FAILED",
+            "TIMEOUT",
+            "CANCELLED"
+          ]
+        },
+        "progress": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "trigger": {
+          "enum": [
+            "MANUAL",
+            "SCHEDULE",
+            "API"
+          ]
+        },
+        "stage": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "errorCode": {
+          "type": "string"
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "analyticsAnomalyDetected": {
+      "description": "EVT-ANA-02 실시간 이상 탐지(생산 data2flow-analytics 워커)",
+      "type": "object",
+      "required": [
+        "analysisId",
+        "deviceId",
+        "metricKey",
+        "occurredAt",
+        "value",
+        "score",
+        "kind",
+        "evidence"
+      ],
+      "properties": {
+        "analysisId": {
+          "type": "string",
+          "pattern": "^[0-9]{1,19}$"
+        },
+        "deviceId": {
+          "type": "string",
+          "pattern": "^[0-9]{1,19}$"
+        },
+        "metricKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "value": {
+          "type": "number"
+        },
+        "score": {
+          "type": "number"
+        },
+        "kind": {
+          "enum": [
+            "SPIKE",
+            "DROP",
+            "LEVEL_SHIFT",
+            "VARIANCE"
+          ]
+        },
+        "evidence": {
+          "type": "object",
+          "required": [
+            "baseline",
+            "threshold",
+            "contributors"
+          ],
+          "properties": {
+            "baseline": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "threshold": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "contributors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "seriesKey": {
+                    "type": "string"
+                  },
+                  "weight": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "analyticsEtaUpdated": {
+      "description": "EVT-ANA-03 기준값 도달 예측(생산 data2flow-analytics 워커). occurredAt·value는 판정에 쓴 측정",
+      "type": "object",
+      "required": [
+        "analysisId",
+        "deviceId",
+        "metricKey",
+        "threshold",
+        "direction",
+        "etaAt",
+        "minutesLeft",
+        "confidence"
+      ],
+      "properties": {
+        "analysisId": {
+          "type": "string",
+          "pattern": "^[0-9]{1,19}$"
+        },
+        "deviceId": {
+          "type": "string",
+          "pattern": "^[0-9]{1,19}$"
+        },
+        "metricKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "direction": {
+          "enum": [
+            "UP",
+            "DOWN"
+          ]
+        },
+        "etaAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "minutesLeft": {
+          "type": "number"
+        },
+        "confidence": {
+          "enum": [
+            "HIGH",
+            "MEDIUM",
+            "LOW"
+          ]
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "value": {
+          "type": "number"
+        }
+      }
+    },
+    "analyticsModelDrift": {
+      "description": "EVT-ANA-04 모델 드리프트(PSI > 0.2)",
+      "type": "object",
+      "required": [
+        "analysisId",
+        "modelId",
+        "psi",
+        "detectedAt"
+      ],
+      "properties": {
+        "analysisId": {
+          "type": "string",
+          "pattern": "^[0-9]{1,19}$"
+        },
+        "modelId": {
+          "type": "string",
+          "pattern": "^[0-9]{1,19}$"
+        },
+        "psi": {
+          "type": "number",
+          "minimum": 0
+        },
+        "detectedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "analyticsScheduleStopped": {
+      "description": "EVT-ANA-05 일정 중지(연속 실패)",
+      "type": "object",
+      "required": [
+        "analysisId",
+        "ownerUserId",
+        "consecutiveFailures"
+      ],
+      "properties": {
+        "analysisId": {
+          "type": "string",
+          "pattern": "^[0-9]{1,19}$"
+        },
+        "ownerUserId": {
+          "type": "string",
+          "pattern": "^[0-9]{1,19}$"
+        },
+        "consecutiveFailures": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "analyticsExportCompleted": {
+      "description": "EVT-ANA-06 PDF 내보내기 완료. userId는 늘 실린다(요청자가 없으면 null)",
+      "type": "object",
+      "required": [
+        "exportJobId",
+        "userId",
+        "downloadUrl",
+        "expiresAt"
+      ],
+      "properties": {
+        "exportJobId": {
+          "type": "string",
+          "pattern": "^[0-9]{1,19}$"
+        },
+        "userId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9]{1,19}$"
+        },
+        "downloadUrl": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exportId": {
+          "type": "string"
+        }
+      }
+    },
+    "aiQuotaExceeded": {
+      "description": "EVT-AIA-03 AI 일일 사용량 한도 도달(생산 data2flow-ai, 같은 한도는 하루 한 번)",
+      "type": "object",
+      "required": [
+        "scope",
+        "limitType",
+        "resetAt"
+      ],
+      "properties": {
+        "scope": {
+          "enum": [
+            "ORG",
+            "USER"
+          ]
+        },
+        "userId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "limitType": {
+          "enum": [
+            "REQUESTS",
+            "TOKENS"
+          ]
+        },
+        "resetAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "if": {
+        "properties": {
+          "scope": {
+            "const": "USER"
+          }
+        },
+        "required": [
+          "scope"
+        ]
+      },
+      "then": {
+        "required": [
+          "userId"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "userId"
+          ]
         }
       }
     }

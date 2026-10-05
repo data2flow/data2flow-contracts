@@ -1,0 +1,1 @@
+{"v": 1, "messageId": "5a1e7c3d-0b2f-4e6a-9c8d-000000000007", "type": "analytics.model.drift", "organizationId": 1, "occurredAt": "2026-10-05T00:00:42Z", "requestId": null, "payload": {"analysisId": "12", "modelId": "3", "psi": 0.312346, "detectedAt": "2026-10-05T00:00:00Z"}}

@@ -1,0 +1,1 @@
+{"v": 1, "messageId": "5a1e7c3d-0b2f-4e6a-9c8d-000000000003", "type": "analytics.run.succeeded", "organizationId": 1, "occurredAt": "2026-10-05T00:00:42Z", "requestId": null, "payload": {"runId": "41", "analysisId": "12", "status": "SUCCEEDED", "progress": 100, "trigger": "MANUAL", "stage": "SAVE", "finishedAt": "2026-10-05T00:00:42Z"}}

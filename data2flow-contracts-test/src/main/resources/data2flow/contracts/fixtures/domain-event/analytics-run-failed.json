@@ -1,0 +1,1 @@
+{"v": 1, "messageId": "5a1e7c3d-0b2f-4e6a-9c8d-000000000004", "type": "analytics.run.failed", "organizationId": 1, "occurredAt": "2026-10-05T00:00:42Z", "requestId": null, "payload": {"runId": "42", "analysisId": "12", "status": "FAILED", "progress": null, "trigger": "SCHEDULE", "stage": null, "errorCode": "INTERNAL_ERROR", "finishedAt": "2026-10-05T00:00:42Z"}}

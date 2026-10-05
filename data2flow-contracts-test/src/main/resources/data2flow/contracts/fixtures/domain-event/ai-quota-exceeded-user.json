@@ -1,0 +1,1 @@
+{"v":1,"messageId":"5a1e7c3d-0b2f-4e6a-9c8d-0000000000a2","type":"ai.quota.exceeded","organizationId":1,"occurredAt":"2026-10-05T05:13:00Z","requestId":"req-ai-2","payload":{"scope":"USER","userId":7,"limitType":"REQUESTS","resetAt":"2026-10-05T15:00:00Z"}}

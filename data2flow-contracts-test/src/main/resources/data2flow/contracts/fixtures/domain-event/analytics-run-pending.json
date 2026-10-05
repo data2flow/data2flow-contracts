@@ -1,0 +1,1 @@
+{"v": 1, "messageId": "5a1e7c3d-0b2f-4e6a-9c8d-000000000001", "type": "analytics.run.pending", "organizationId": 1, "occurredAt": "2026-10-05T00:00:00Z", "requestId": "req-ana-1", "payload": {"runId": "41", "analysisId": "12", "status": "PENDING", "progress": 0, "trigger": "MANUAL", "stage": null}}

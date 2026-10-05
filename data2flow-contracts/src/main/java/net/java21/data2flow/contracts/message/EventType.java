@@ -2,6 +2,13 @@ package net.java21.data2flow.contracts.message;
 
 import net.java21.data2flow.contracts.command.CommandStatus;
 import net.java21.data2flow.contracts.message.event.AggregatesRecomputed;
+import net.java21.data2flow.contracts.message.event.AiQuotaExceeded;
+import net.java21.data2flow.contracts.message.event.AnalyticsAnomalyDetected;
+import net.java21.data2flow.contracts.message.event.AnalyticsEtaUpdated;
+import net.java21.data2flow.contracts.message.event.AnalyticsExportCompleted;
+import net.java21.data2flow.contracts.message.event.AnalyticsModelDrift;
+import net.java21.data2flow.contracts.message.event.AnalyticsRunStatusChanged;
+import net.java21.data2flow.contracts.message.event.AnalyticsScheduleStopped;
 import net.java21.data2flow.contracts.message.event.AlarmSignal;
 import net.java21.data2flow.contracts.message.event.AlarmStateChanged;
 import net.java21.data2flow.contracts.message.event.NotificationDeliveryResult;
@@ -62,7 +69,8 @@ import java.util.stream.Collectors;
 /**
  * 도메인 이벤트 종류: {@code data2flow.events}(topic) 라우팅 키, 이벤트 ID, 페이로드 타입, 스키마 버전(architecture.md §4.5).
  *
- * <p>M2(수집 경로), M3(가상 폐루프: ACT·SIM·FLW), M4(자동화 완성: RUL·ACT·FLW·OPS·DEV), M5(데이터 관리: DSC·TSD·DEV·ING)에서
+ * <p>M2(수집 경로), M3(가상 폐루프: ACT·SIM·FLW), M4(자동화 완성: RUL·ACT·FLW·OPS·DEV), M5(데이터 관리: DSC·TSD·DEV·ING),
+ * M6(분석 ANA — 생산자는 Python data2flow-analytics, AI AIA)에서
  * 쓰는 종류가 있다. 다음 마일스톤이 종류를 더할 때는 여기에 상수를 추가하고
  * {@code domain-event.v1.json}의 {@code $defs}에도 페이로드 스키마를 더한다(계약 테스트가 둘이 맞는지 확인한다).
  */
@@ -165,13 +173,31 @@ public enum EventType {
     WORKORDER_CHANGED("workorder.changed", "EVT-DEV-09", WorkOrderChanged.class),
     DEVICE_EXPORT_COMPLETED("device.export.completed", "EVT-DEV-13", DeviceExportCompleted.class),
     DEVICE_COMMISSIONING_CHANGED("device.commissioning.changed", "EVT-DEV-14", DeviceCommissioningChanged.class),
-    INGEST_REPROCESS_FINISHED("ingest.reprocess.finished", "EVT-ING-09", ReprocessJobFinished.class);
+    INGEST_REPROCESS_FINISHED("ingest.reprocess.finished", "EVT-ING-09", ReprocessJobFinished.class),
+
+    // M6 분석(ANA, 생산 data2flow-analytics Python)·AI(AIA)
+    ANALYTICS_RUN_QUEUED("analytics.run.queued", "EVT-ANA-01", AnalyticsRunStatusChanged.class),
+    ANALYTICS_RUN_PENDING("analytics.run.pending", "EVT-ANA-01", AnalyticsRunStatusChanged.class),
+    ANALYTICS_RUN_RUNNING("analytics.run.running", "EVT-ANA-01", AnalyticsRunStatusChanged.class),
+    ANALYTICS_RUN_SUCCEEDED("analytics.run.succeeded", "EVT-ANA-01", AnalyticsRunStatusChanged.class),
+    ANALYTICS_RUN_FAILED("analytics.run.failed", "EVT-ANA-01", AnalyticsRunStatusChanged.class),
+    ANALYTICS_RUN_TIMEOUT("analytics.run.timeout", "EVT-ANA-01", AnalyticsRunStatusChanged.class),
+    ANALYTICS_RUN_CANCELLED("analytics.run.cancelled", "EVT-ANA-01", AnalyticsRunStatusChanged.class),
+    ANALYTICS_ANOMALY_DETECTED("analytics.anomaly.detected", "EVT-ANA-02", AnalyticsAnomalyDetected.class),
+    ANALYTICS_ETA_UPDATED("analytics.eta.updated", "EVT-ANA-03", AnalyticsEtaUpdated.class),
+    ANALYTICS_MODEL_DRIFT("analytics.model.drift", "EVT-ANA-04", AnalyticsModelDrift.class),
+    ANALYTICS_SCHEDULE_STOPPED("analytics.schedule.stopped", "EVT-ANA-05", AnalyticsScheduleStopped.class),
+    ANALYTICS_EXPORT_COMPLETED("analytics.export.completed", "EVT-ANA-06", AnalyticsExportCompleted.class),
+    AI_QUOTA_EXCEEDED("ai.quota.exceeded", "EVT-AIA-03", AiQuotaExceeded.class);
 
     /** EVT-RUL-02 라우팅 키 접두사 */
     public static final String ALARM_PREFIX = "alarm.";
 
     /** EVT-SIM-01 라우팅 키 접두사 */
     public static final String SIM_RUN_PREFIX = "sim.run.";
+
+    /** EVT-ANA-01 라우팅 키 접두사({@code analytics.run.*}로 바인딩한다) */
+    public static final String ANALYTICS_RUN_PREFIX = "analytics.run.";
 
     private static final Map<String, EventType> BY_ROUTING_KEY = Arrays.stream(values())
             .collect(Collectors.toUnmodifiableMap(EventType::routingKey, Function.identity()));
@@ -230,6 +256,12 @@ public enum EventType {
             throw new IllegalArgumentException("alarm.signal은 상태 이벤트가 아닙니다");
         }
         return type;
+    }
+
+    /** EVT-ANA-01 실행 상태별 종류. UNKNOWN이면 {@link IllegalArgumentException} */
+    public static EventType analyticsRun(AnalyticsRunStatusChanged.Status status) {
+        return fromRoutingKey(status == AnalyticsRunStatusChanged.Status.UNKNOWN ? "" : ANALYTICS_RUN_PREFIX + status.routingSuffix())
+                .orElseThrow(() -> new IllegalArgumentException("발행할 수 없는 분석 실행 상태입니다: " + status));
     }
 
     /** 라우팅 키로 찾는다. 이 코드가 모르는 종류면 빈 값(소비자는 무시한다) */
