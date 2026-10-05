@@ -1,0 +1,15 @@
+{
+  "v": 1,
+  "messageId": "7c2e3f40-5162-4374-8c8d-9e0f1a2b3c4e",
+  "organizationId": 1,
+  "sourceId": 5,
+  "sourceType": "CONNECTOR",
+  "topic": "site/a/em-1",
+  "payload": "eyJ0ZW1wZXJhdHVyZSI6MjIuNX0=",
+  "receivedAt": "2026-10-05T01:00:01Z",
+  "ingressInstance": "data2flow-ingress-0",
+  "dedupKey": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "virtual": false,
+  "ingressStatus": "UNMATCHED_TOPIC",
+  "ingressError": "토픽이 템플릿 site/{site}/room/{room}/{deviceId}/{metric}에 맞지 않습니다"
+}

@@ -1,0 +1,16 @@
+{
+  "v": 1,
+  "messageId": "6b1d2e3f-4051-4263-9b7c-8d9e0f1a2b3d",
+  "organizationId": 1,
+  "sourceId": 5,
+  "sourceType": "CONNECTOR",
+  "topic": "site/a/room/301/em-1/temperature",
+  "payload": "eyJ0ZW1wZXJhdHVyZSI6MjIuNSwic2VxIjo3fQ==",
+  "receivedAt": "2026-10-05T01:00:00Z",
+  "ingressInstance": "data2flow-ingress-0",
+  "dedupKey": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "virtual": false,
+  "payloadFormat": "PROTOBUF",
+  "originalPayload": "CQAAAAAAgDZAEAc=",
+  "topicAttributes": { "site": "a", "room": "301", "deviceId": "em-1", "metric": "temperature", "externalId": "em-1", "spaceHint": "a/301" }
+}

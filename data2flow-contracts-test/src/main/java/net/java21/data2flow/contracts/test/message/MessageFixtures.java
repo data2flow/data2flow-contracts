@@ -41,7 +41,7 @@ public final class MessageFixtures {
 
     /** 원본 봉투: ChirpStack v4 업링크(WS302), Webhook 단일 값, 시뮬레이터 가상 메시지 */
     public static final List<String> RAW_ENVELOPE = List.of(
-            "chirpstack-ws302-uplink", "webhook-single-value", "simulation-virtual");
+            "chirpstack-ws302-uplink", "webhook-single-value", "simulation-virtual", "protobuf-converted", "unmatched-topic");
 
     /** 행동 요청: 플로우 "고온이면 냉방" 제어 노드(공간 관계 대상), 사용자 기기 명령(모르는 필드 포함) */
     public static final List<String> ACTION_REQUEST = List.of("flow-command-heatwave", "user-command-device", "flow-command-device-source-space");

@@ -1,5 +1,6 @@
 package net.java21.data2flow.contracts.message;
 
+import net.java21.data2flow.contracts.messaging.DedupKeys;
 import net.java21.data2flow.contracts.messaging.StreamRoutingKeys;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import tools.jackson.databind.JsonNode;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,5 +85,41 @@ class RawEnvelopeContractTest {
         String v2 = codec.writeAsString(sample()).replace("\"v\":1", "\"v\":2");
         assertThatThrownBy(() -> codec.read(v2, RawEnvelope.class)).isInstanceOf(UnsupportedSchemaVersionException.class);
         assertThat(SourceTypes.KNOWN).contains(SourceTypes.CONNECTOR, SourceTypes.EDGE, SourceTypes.SIMULATION).hasSize(13);
+    }
+
+    @Test
+    @DisplayName("DSC-09.07 TC-DSC-280 형식 변환 사본은 바꾼 JSON을 payload로, 받은 바이트를 originalPayload로 싣고 스키마를 통과한다")
+    void convertedPayloadKeepsOriginal() {
+        byte[] original = {0x09, 0, 0, 0, 0, 0, (byte) 0x80, 0x36, 0x40, 0x10, 0x07};
+        RawEnvelope raw = RawEnvelope.of(1, 5, SourceTypes.CONNECTOR, "site/a/room/301/em-1/temperature", original,
+                Instant.parse("2026-10-05T01:00:00Z"), "data2flow-ingress-0", DedupKeys.content(5, "t", original));
+        byte[] json = "{\"temperature\":22.5,\"seq\":7}".getBytes(StandardCharsets.UTF_8);
+        RawEnvelope converted = raw.withTopicAttributes(Map.of("deviceId", "em-1", IngressStatus.ATTR_EXTERNAL_ID, "em-1"))
+                .withConvertedPayload("PROTOBUF", json, raw.dedupKey());
+        assertThat(converted.payload()).isEqualTo(json);
+        assertThat(converted.originalPayload()).isEqualTo(original);
+        assertThat(converted.payloadFormat()).isEqualTo("PROTOBUF");
+        assertThat(converted.withConvertedPayload("PROTOBUF", json, raw.dedupKey()).originalPayload())
+                .as("두 번 바꿔도 원본은 처음 받은 바이트").isEqualTo(original);
+        MessageSchemas.assertValid(converted);
+        RawEnvelope read = codec.read(codec.write(converted), RawEnvelope.class);
+        assertThat(read).isEqualTo(converted);
+        assertThat(read.topicAttributes()).containsEntry("externalId", "em-1");
+        assertThat(converted.toString()).contains("originalPayload=11 bytes").doesNotContain("em-1\"");
+        assertThat(converted.asVirtual(3L).payloadFormat()).isEqualTo("PROTOBUF");
+        assertThat(converted.withSignature(SignatureStatus.VERIFIED, json).originalPayload()).isEqualTo(original);
+    }
+
+    @Test
+    @DisplayName("DSC-09.08 TC-DSC-285 BR-DSC-28 미처리 판정은 payload를 그대로 두고 상태·원인만 싣는다(원인은 500자에서 자른다)")
+    void ingressStatusKeepsPayload() {
+        RawEnvelope raw = sample().withIngressStatus(IngressStatus.UNMATCHED_TOPIC, "x".repeat(600));
+        assertThat(raw.payload()).isEqualTo(PAYLOAD);
+        assertThat(raw.ingressStatus()).isEqualTo("UNMATCHED_TOPIC");
+        assertThat(raw.ingressError()).hasSize(RawEnvelope.MAX_INGRESS_ERROR_LENGTH);
+        MessageSchemas.assertValid(raw);
+        JsonNode tree = codec.toTree(sample());
+        assertThat(tree.path("ingressStatus").isNull() || tree.path("ingressStatus").isMissingNode()).as("없으면 null").isTrue();
+        assertThat(tree.path("originalPayload").isNull() || tree.path("originalPayload").isMissingNode()).isTrue();
     }
 }

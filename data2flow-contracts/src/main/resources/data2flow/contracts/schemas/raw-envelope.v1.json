@@ -18,6 +18,11 @@
     "dedupKey": { "type": "string", "minLength": 1, "maxLength": 128 },
     "virtual": { "type": "boolean" },
     "simRunId": { "type": ["integer", "null"], "minimum": 1 },
-    "signatureStatus": { "type": ["string", "null"], "enum": ["VERIFIED", "UNSIGNED", "INVALID", null], "description": "플랫폼 브로커 기기 payload 서명 검증 결과(DSC-03.03·03.05). PLATFORM_BROKER 소스만, 그 밖에는 생략" }
+    "signatureStatus": { "type": ["string", "null"], "enum": ["VERIFIED", "UNSIGNED", "INVALID", null], "description": "플랫폼 브로커 기기 payload 서명 검증 결과(DSC-03.03·03.05). PLATFORM_BROKER 소스만, 그 밖에는 생략" },
+    "payloadFormat": { "type": ["string", "null"], "enum": ["JSON", "CBOR", "MSGPACK", "PROTOBUF", "AVRO", "CSV", "TEXT", "BINARY", "SPARKPLUG_B", null], "description": "ingress가 payload를 구조화된 JSON으로 바꿨을 때(또는 압축만 풀었을 때) 원래 형식(DSC-09.07). 바꾸지 않았으면 생략" },
+    "originalPayload": { "type": ["string", "null"], "contentEncoding": "base64", "description": "payloadFormat이 있을 때 받은 그대로의 바이트(무손실 보관)" },
+    "topicAttributes": { "type": ["object", "null"], "additionalProperties": { "type": "string" }, "description": "토픽 템플릿으로 뽑은 값(DSC-09.08). 예약 키 externalId·metric·spaceHint" },
+    "ingressStatus": { "type": ["string", "null"], "enum": ["DECODE_ERROR", "UNMATCHED_TOPIC", null], "description": "ingress 미처리 판정(BR-DSC-28). 있으면 payload는 받은 그대로이고 pipeline은 원본만 이 상태로 남긴다" },
+    "ingressError": { "type": ["string", "null"], "maxLength": 500 }
   }
 }
