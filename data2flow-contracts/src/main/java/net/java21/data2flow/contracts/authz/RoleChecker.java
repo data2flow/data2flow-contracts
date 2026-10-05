@@ -54,14 +54,14 @@ public class RoleChecker {
         return CurrentUserHolder.get();
     }
 
-    /** 요청 사용자의 현재 권한 */
+    /** 요청 사용자의 현재 권한. 장기 토큰 요청이면 토큰 ID를 넘겨 토큰 주체의 권한으로 판정한다(IAM-05.01·IAM-04.07) */
     public AccessGrant grant() {
         CurrentUser user = currentUser();
         Memo cached = memo.get();
         if (cached != null && cached.user() == user) {
             return cached.grant();
         }
-        AccessGrant grant = lookup.find(user.organizationId(), user.userId());
+        AccessGrant grant = lookup.find(user.organizationId(), user.userId(), user.accessTokenId());
         memo.set(new Memo(user, grant));
         return grant;
     }

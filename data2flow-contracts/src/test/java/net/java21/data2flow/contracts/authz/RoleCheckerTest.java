@@ -170,4 +170,23 @@ class RoleCheckerTest {
             return 404;
         }
     }
+
+    @Test
+    @DisplayName("[IAM-05.01][IAM-04.07] 장기 토큰 요청은 토큰 ID를 권한 원천에 넘기고, 같은 사용자의 웹 요청과 다른 판정을 받는다")
+    void tokenIdReachesLookup() {
+        // given: 웹 신원은 OPERATOR·전체, 토큰 501은 FLOOR_2만
+        List<Long> seen = new ArrayList<>();
+        RoleChecker checker = new RoleChecker(PermissionLookup.tokenAware((org, user, tokenId) -> {
+            seen.add(tokenId);
+            return tokenId == null ? AccessGrant.of(BuiltinRole.OPERATOR, SpaceScope.all())
+                    : AccessGrant.of(BuiltinRole.OPERATOR, SpaceScope.only(Set.of(FLOOR_2)));
+        }), audits::add);
+        CurrentUserHolder.set(new CurrentUser(7, ORG_A));
+        assertThat(checker.spaceScope().includes(FLOOR_3)).isTrue();
+        // when
+        CurrentUserHolder.set(new CurrentUser(7, ORG_A, 501L, Set.of("read:devices")));
+        // then
+        assertThat(checker.spaceScope().includes(FLOOR_3)).isFalse();
+        assertThat(seen).containsExactly(null, 501L);
+    }
 }
