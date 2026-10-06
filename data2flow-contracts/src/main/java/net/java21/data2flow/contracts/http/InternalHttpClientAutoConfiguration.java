@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import java.net.http.HttpClient;
 
 /**
- * Boot가 만드는 {@code RestClient.Builder}·{@code RestTemplateBuilder}가 JDK HttpClient를 쓸 때 HTTP/1.1로 고정한다(ANA-04.01, ADR-059).
+ * Boot가 만드는 {@code RestClient.Builder}·{@code RestTemplateBuilder}가 JDK HttpClient를 쓸 때 HTTP/1.1로 고정한다(ANA-04.01, ADR-060).
  * 주입받은 빌더로 내부 서비스를 부르는 곳(ingress·simulator 등)이 {@code Upgrade: h2c}를 보내지 않게 한다.
  * 다른 팩토리(Apache·Jetty·Reactor·Simple)는 원래 HTTP/1.1이라 손대지 않는다. {@code data2flow.http.force-http11=false}로 끈다.
  */

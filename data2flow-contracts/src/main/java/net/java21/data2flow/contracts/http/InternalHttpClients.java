@@ -6,7 +6,7 @@ import java.net.http.HttpClient;
 import java.time.Duration;
 
 /**
- * 서비스 간 내부 호출용 JDK HttpClient(ADR-021·ADR-059: 내부 통신은 평문 HTTP 80).
+ * 서비스 간 내부 호출용 JDK HttpClient(ADR-021·ADR-060: 내부 통신은 평문 HTTP 80).
  *
  * <p>JDK HttpClient의 기본 버전은 HTTP/2라서 평문 {@code http://}에 {@code Connection: Upgrade, HTTP2-Settings}·{@code Upgrade: h2c}
  * 헤더를 붙인다. uvicorn(httptools)은 지원하지 않는 업그레이드 요청의 본문을 버리므로 core→analytics POST가 빈 본문(400)이 됐다.
