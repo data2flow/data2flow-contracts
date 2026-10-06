@@ -15,11 +15,13 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * {@code Idempotency-Key}가 붙은 쓰기 요청의 본문을 미리 읽고 응답을 잡아 둔다(OPS-12.03). 실제 판정은
+ * {@code Idempotency-Key}가 붙은 쓰기 요청의 본문을 미리 읽고 응답을 잡아 둔다(OPS-12.03). multipart·form 본문은 읽지 않는다
+ * ({@link CachedBodyRequest#deferred}). 실제 판정은
  * {@link IdempotencyInterceptor}가 {@link Idempotent} 엔드포인트에서만 한다. 요청이 끝나면 2xx·3xx 응답은 저장하고,
  * 4xx·5xx·예외면 키를 푼다.
  */
@@ -47,11 +49,16 @@ public class IdempotencyFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         CachedBodyRequest cached;
-        try {
-            cached = CachedBodyRequest.read(request, maxBodyBytes);
-        } catch (CachedBodyRequest.PayloadTooLargeException ex) {
-            errorWriter.write(request, response, CommonErrorCode.PAYLOAD_TOO_LARGE, Map.of(), maxBodyBytes + " bytes");
-            return;
+        if (isFormBody(request)) {
+            // multipart·form은 컨테이너가 원문을 읽어야 한다. 크기 상한은 multipart 설정(spring.servlet.multipart.*)이 맡는다
+            cached = CachedBodyRequest.deferred(request);
+        } else {
+            try {
+                cached = CachedBodyRequest.read(request, maxBodyBytes);
+            } catch (CachedBodyRequest.PayloadTooLargeException ex) {
+                errorWriter.write(request, response, CommonErrorCode.PAYLOAD_TOO_LARGE, Map.of(), maxBodyBytes + " bytes");
+                return;
+            }
         }
         ContentCachingResponseWrapper captured = new ContentCachingResponseWrapper(response);
         boolean completed = false;
@@ -62,6 +69,16 @@ public class IdempotencyFilter extends OncePerRequestFilter {
             settle(cached, captured, completed);
             captured.copyBodyToResponse();
         }
+    }
+
+    /** multipart/* 또는 application/x-www-form-urlencoded 본문 */
+    static boolean isFormBody(HttpServletRequest request) {
+        String type = request.getContentType();
+        if (type == null) {
+            return false;
+        }
+        String lower = type.toLowerCase(Locale.ROOT);
+        return lower.startsWith("multipart/") || lower.startsWith("application/x-www-form-urlencoded");
     }
 
     private void settle(HttpServletRequest request, ContentCachingResponseWrapper response, boolean completed) {

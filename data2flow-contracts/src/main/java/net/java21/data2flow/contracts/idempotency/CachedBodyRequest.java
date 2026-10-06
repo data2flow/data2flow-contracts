@@ -15,7 +15,9 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * 본문을 미리 다 읽어 두는 요청. 멱등 키 해시를 컨트롤러보다 먼저 계산하고, 컨트롤러는 같은 본문을 다시 읽는다.
- * JSON 본문 API용이다(form 파라미터 본문은 지원하지 않음).
+ *
+ * <p>multipart·form 본문은 미리 읽지 않는다({@link #deferred}). 서블릿 컨테이너가 원문 스트림에서 파트·파라미터를 직접 읽어야 하므로,
+ * 먼저 읽어 버리면 파일 업로드가 500(Stream closed)이 된다. 이때 해시는 {@link IdempotencyInterceptor}가 파트·파라미터로 계산한다.
  */
 class CachedBodyRequest extends HttpServletRequestWrapper {
 
@@ -24,6 +26,16 @@ class CachedBodyRequest extends HttpServletRequestWrapper {
     private CachedBodyRequest(HttpServletRequest request, byte[] body) {
         super(request);
         this.body = body;
+    }
+
+    /** 본문을 읽지 않고 표시만 한다(multipart·form). 컨테이너가 파트·파라미터를 그대로 읽는다 */
+    static CachedBodyRequest deferred(HttpServletRequest request) {
+        return new CachedBodyRequest(request, null);
+    }
+
+    /** 본문을 미리 읽지 않은 요청이면 true */
+    boolean deferred() {
+        return body == null;
     }
 
     /** 본문이 {@code maxBytes}를 넘으면 {@link PayloadTooLargeException} */
@@ -38,11 +50,14 @@ class CachedBodyRequest extends HttpServletRequestWrapper {
     }
 
     byte[] body() {
-        return body.clone();
+        return body == null ? new byte[0] : body.clone();
     }
 
     @Override
-    public ServletInputStream getInputStream() {
+    public ServletInputStream getInputStream() throws IOException {
+        if (body == null) {
+            return super.getInputStream();
+        }
         ByteArrayInputStream in = new ByteArrayInputStream(body);
         return new ServletInputStream() {
             @Override
@@ -68,7 +83,10 @@ class CachedBodyRequest extends HttpServletRequestWrapper {
     }
 
     @Override
-    public BufferedReader getReader() {
+    public BufferedReader getReader() throws IOException {
+        if (body == null) {
+            return super.getReader();
+        }
         String encoding = getCharacterEncoding();
         Charset charset = encoding == null ? StandardCharsets.UTF_8 : Charset.forName(encoding);
         return new BufferedReader(new InputStreamReader(getInputStream(), charset));

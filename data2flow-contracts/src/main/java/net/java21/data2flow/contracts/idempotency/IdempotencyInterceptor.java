@@ -1,6 +1,8 @@
 package net.java21.data2flow.contracts.idempotency;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 import jakarta.servlet.http.HttpServletResponse;
 import net.java21.data2flow.contracts.error.BusinessException;
 import net.java21.data2flow.contracts.error.CommonErrorCode;
@@ -15,6 +17,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -22,6 +25,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Locale;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 /**
@@ -73,7 +78,8 @@ public class IdempotencyInterceptor implements HandlerInterceptor {
         }
         IdempotencyScope scope = scope(request, key);
         Instant now = clock.instant();
-        IdempotencyClaim claim = store.claim(scope, hash(request, cached.body()), now,
+        String hash = cached.deferred() ? formHash(request) : hash(request, cached.body());
+        IdempotencyClaim claim = store.claim(scope, hash, now,
                 now.plus(properties.ttl()), now.minus(properties.inProgressTimeout()));
         switch (claim.outcome()) {
             case ACQUIRED -> {
@@ -112,6 +118,41 @@ public class IdempotencyInterceptor implements HandlerInterceptor {
             return HexFormat.of().formatHex(digest.digest());
         } catch (NoSuchAlgorithmException ex) {
             throw new IllegalStateException(ex);
+        }
+    }
+
+    /**
+     * multipart·form 본문의 해시. 경계 문자열은 요청마다 달라지므로 원문 대신 파트(이름·파일 이름·형식·크기·내용)와 파라미터로 계산한다.
+     * 그래서 같은 파일을 다시 보내면 같은 해시, 다른 파일이면 409 IDEMPOTENCY_KEY_REUSED다.
+     */
+    static String formHash(HttpServletRequest request) throws IOException {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            String head = request.getMethod() + "\n" + request.getRequestURI() + "?"
+                    + (request.getQueryString() == null ? "" : request.getQueryString()) + "\n";
+            digest.update(head.getBytes(StandardCharsets.UTF_8));
+            String type = request.getContentType() == null ? "" : request.getContentType().toLowerCase(Locale.ROOT);
+            if (type.startsWith("multipart/")) {
+                for (Part part : request.getParts()) {
+                    String meta = "part\n" + part.getName() + "\n" + part.getSubmittedFileName() + "\n" + part.getContentType()
+                            + "\n" + part.getSize() + "\n";
+                    digest.update(meta.getBytes(StandardCharsets.UTF_8));
+                    try (InputStream in = part.getInputStream()) {
+                        byte[] buffer = new byte[8192];
+                        for (int n; (n = in.read(buffer)) > 0; ) {
+                            digest.update(buffer, 0, n);
+                        }
+                    }
+                }
+            } else {
+                new TreeMap<>(request.getParameterMap()).forEach((name, values) -> digest.update(
+                        ("param\n" + name + "\n" + String.join("\u0000", values) + "\n").getBytes(StandardCharsets.UTF_8)));
+            }
+            return HexFormat.of().formatHex(digest.digest());
+        } catch (NoSuchAlgorithmException ex) {
+            throw new IllegalStateException(ex);
+        } catch (ServletException ex) {
+            throw new IOException(ex);
         }
     }
 
