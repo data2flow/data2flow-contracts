@@ -36,6 +36,7 @@ import net.java21.data2flow.contracts.message.event.DeviceCommissioningChanged;
 import net.java21.data2flow.contracts.message.event.ReprocessJobFinished;
 import net.java21.data2flow.contracts.message.event.ClockSkewSuspected;
 import net.java21.data2flow.contracts.message.event.CommandStatusChanged;
+import net.java21.data2flow.contracts.message.event.ComplianceApplicationChanged;
 import net.java21.data2flow.contracts.message.event.ConnectorCatalogReported;
 import net.java21.data2flow.contracts.message.event.DeviceChanged;
 import net.java21.data2flow.contracts.message.event.DeviceCommandAck;
@@ -188,7 +189,10 @@ public enum EventType {
     ANALYTICS_MODEL_DRIFT("analytics.model.drift", "EVT-ANA-04", AnalyticsModelDrift.class),
     ANALYTICS_SCHEDULE_STOPPED("analytics.schedule.stopped", "EVT-ANA-05", AnalyticsScheduleStopped.class),
     ANALYTICS_EXPORT_COMPLETED("analytics.export.completed", "EVT-ANA-06", AnalyticsExportCompleted.class),
-    AI_QUOTA_EXCEEDED("ai.quota.exceeded", "EVT-AIA-03", AiQuotaExceeded.class);
+    AI_QUOTA_EXCEEDED("ai.quota.exceeded", "EVT-AIA-03", AiQuotaExceeded.class),
+
+    // M7 환경 기준(CMP)
+    COMPLIANCE_APPLICATION_CHANGED("compliance.application.changed", "EVT-CMP-01", ComplianceApplicationChanged.class);
 
     /** EVT-RUL-02 라우팅 키 접두사 */
     public static final String ALARM_PREFIX = "alarm.";

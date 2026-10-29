@@ -21,6 +21,7 @@ import net.java21.data2flow.contracts.message.event.AlarmStateChanged;
 import net.java21.data2flow.contracts.message.event.BiExportFinished;
 import net.java21.data2flow.contracts.message.event.CalendarSynced;
 import net.java21.data2flow.contracts.message.event.CommandNoEffect;
+import net.java21.data2flow.contracts.message.event.ComplianceApplicationChanged;
 import net.java21.data2flow.contracts.message.event.CredentialRevoked;
 import net.java21.data2flow.contracts.message.event.DeviceCommissioningChanged;
 import net.java21.data2flow.contracts.message.event.DeviceConnectivityChanged;
@@ -157,6 +158,8 @@ final class M4M5EventSamples {
         m.put(EventType.ANALYTICS_EXPORT_COMPLETED, new AnalyticsExportCompleted("9", "7", "/bff/download/ana-41-9", T.plusSeconds(86_400),
                 "ana-41-9"));
         m.put(EventType.AI_QUOTA_EXCEEDED, AiQuotaExceeded.user(7, AiQuotaExceeded.LimitType.REQUESTS, T.plusSeconds(3600)));
+        m.put(EventType.COMPLIANCE_APPLICATION_CHANGED, new ComplianceApplicationChanged(5, 2, 1, List.of(31L, 32L),
+                ComplianceApplicationChanged.Change.CREATED));
         return m;
     }
 }

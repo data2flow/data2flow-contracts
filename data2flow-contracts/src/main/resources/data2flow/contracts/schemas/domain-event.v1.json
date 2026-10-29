@@ -143,7 +143,8 @@
     "analytics.model.drift": "analyticsModelDrift",
     "analytics.schedule.stopped": "analyticsScheduleStopped",
     "analytics.export.completed": "analyticsExportCompleted",
-    "ai.quota.exceeded": "aiQuotaExceeded"
+    "ai.quota.exceeded": "aiQuotaExceeded",
+    "compliance.application.changed": "complianceApplicationChanged"
   },
   "allOf": [
     {
@@ -2042,6 +2043,25 @@
         "properties": {
           "payload": {
             "$ref": "#/$defs/aiQuotaExceeded"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "compliance.application.changed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/complianceApplicationChanged"
           }
         }
       }
@@ -4847,6 +4867,44 @@
         "not": {
           "required": [
             "userId"
+          ]
+        }
+      }
+    },
+    "complianceApplicationChanged": {
+      "type": "object",
+      "required": [
+        "applicationId",
+        "profileId",
+        "versionNo",
+        "spaceIds",
+        "change"
+      ],
+      "properties": {
+        "applicationId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "profileId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "versionNo": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "spaceIds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "change": {
+          "enum": [
+            "CREATED",
+            "DELETED",
+            "VERSION_ADVANCED"
           ]
         }
       }
