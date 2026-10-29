@@ -23,6 +23,7 @@ import net.java21.data2flow.contracts.message.event.CalendarSynced;
 import net.java21.data2flow.contracts.message.event.CommandNoEffect;
 import net.java21.data2flow.contracts.message.event.ComplianceApplicationChanged;
 import net.java21.data2flow.contracts.message.event.ComplianceExcursionChanged;
+import net.java21.data2flow.contracts.message.event.ComplianceReportPublished;
 import net.java21.data2flow.contracts.message.event.ComplianceScoreUpdated;
 import net.java21.data2flow.contracts.message.event.ComplianceStreakBroken;
 import net.java21.data2flow.contracts.message.event.CredentialRevoked;
@@ -165,6 +166,9 @@ final class M4M5EventSamples {
                 ComplianceApplicationChanged.Change.CREATED));
         m.put(EventType.COMPLIANCE_SCORE_UPDATED, new ComplianceScoreUpdated(31, T, 75, ComplianceScoreUpdated.Grade.MODERATE,
                 Map.of("co2", 3, "pm2_5", 5), "co2", ComplianceScoreUpdated.Basis.PROFILE));
+        m.put(EventType.COMPLIANCE_REPORT_PUBLISHED, new ComplianceReportPublished(41, 2, ComplianceReportPublished.Type.KR_SELF_CHECK,
+                "2026-09 자가 점검(실습실)", java.time.LocalDate.parse("2026-09-01"), java.time.LocalDate.parse("2026-09-30"),
+                "9f2a" + "0".repeat(57) + "c41", new ComplianceReportPublished.Recipients(List.of(7L), List.of("ops@example.com"))));
         m.put(EventType.COMPLIANCE_EXCURSION_STARTED, new ComplianceExcursionChanged(9, 31, "co2", 4, T, null, new java.math.BigDecimal("1210.5")));
         m.put(EventType.COMPLIANCE_EXCURSION_ENDED, new ComplianceExcursionChanged(9, 31, "co2", 4, T, T.plusSeconds(1800),
                 new java.math.BigDecimal("1210.5")));
