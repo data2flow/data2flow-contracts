@@ -27,6 +27,7 @@ import net.java21.data2flow.contracts.message.event.ComplianceReportPublished;
 import net.java21.data2flow.contracts.message.event.ComplianceScoreUpdated;
 import net.java21.data2flow.contracts.message.event.ComplianceStreakBroken;
 import net.java21.data2flow.contracts.message.event.CredentialRevoked;
+import net.java21.data2flow.contracts.message.event.EnergyBaselineTrained;
 import net.java21.data2flow.contracts.message.event.EnergyConfigChanged;
 import net.java21.data2flow.contracts.message.event.EnergyDailyUpdated;
 import net.java21.data2flow.contracts.message.event.DeviceCommissioningChanged;
@@ -172,6 +173,8 @@ final class M4M5EventSamples {
                 "2026-09 자가 점검(실습실)", java.time.LocalDate.parse("2026-09-01"), java.time.LocalDate.parse("2026-09-30"),
                 "9f2a" + "0".repeat(57) + "c41", new ComplianceReportPublished.Recipients(List.of(7L), List.of("ops@example.com"))));
         m.put(EventType.ENERGY_CONFIG_CHANGED, new EnergyConfigChanged(EnergyConfigChanged.Scope.TARIFF, 1L));
+        m.put(EventType.ENERGY_BASELINE_TRAINED, new EnergyBaselineTrained(7L, EnergyBaselineTrained.Status.READY, 0.93,
+                java.util.Map.of("intercept", 50.1, "cdd", 8.02, "hdd", 0.0, "weekend", -12.3), "bl-7", null, null, null, 60));
         m.put(EventType.ENERGY_DAILY_UPDATED, new EnergyDailyUpdated(List.of(java.time.LocalDate.parse("2026-10-28")), List.of("31"), false));
         m.put(EventType.COMPLIANCE_EXCURSION_STARTED, new ComplianceExcursionChanged(9, 31, "co2", 4, T, null, new java.math.BigDecimal("1210.5")));
         m.put(EventType.COMPLIANCE_EXCURSION_ENDED, new ComplianceExcursionChanged(9, 31, "co2", 4, T, T.plusSeconds(1800),
