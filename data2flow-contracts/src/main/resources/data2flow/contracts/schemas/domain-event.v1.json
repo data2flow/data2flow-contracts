@@ -144,7 +144,11 @@
     "analytics.schedule.stopped": "analyticsScheduleStopped",
     "analytics.export.completed": "analyticsExportCompleted",
     "ai.quota.exceeded": "aiQuotaExceeded",
-    "compliance.application.changed": "complianceApplicationChanged"
+    "compliance.application.changed": "complianceApplicationChanged",
+    "compliance.score.updated": "complianceScoreUpdated",
+    "compliance.excursion.started": "complianceExcursionChanged",
+    "compliance.excursion.ended": "complianceExcursionChanged",
+    "compliance.streak.broken": "complianceStreakBroken"
   },
   "allOf": [
     {
@@ -2062,6 +2066,82 @@
         "properties": {
           "payload": {
             "$ref": "#/$defs/complianceApplicationChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "compliance.score.updated"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/complianceScoreUpdated"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "compliance.excursion.started"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/complianceExcursionChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "compliance.excursion.ended"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/complianceExcursionChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "compliance.streak.broken"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/complianceStreakBroken"
           }
         }
       }
@@ -4906,6 +4986,140 @@
             "DELETED",
             "VERSION_ADVANCED"
           ]
+        }
+      }
+    },
+    "complianceScoreUpdated": {
+      "type": "object",
+      "required": [
+        "spaceId",
+        "time",
+        "score",
+        "grade",
+        "indices",
+        "basis"
+      ],
+      "properties": {
+        "spaceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "score": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "grade": {
+          "enum": [
+            "GOOD",
+            "MODERATE",
+            "POOR",
+            "BAD",
+            null
+          ]
+        },
+        "indices": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          }
+        },
+        "topPenaltyMetric": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "basis": {
+          "enum": [
+            "PROFILE",
+            "DEFAULT"
+          ]
+        }
+      }
+    },
+    "complianceExcursionChanged": {
+      "type": "object",
+      "required": [
+        "excursionId",
+        "spaceId",
+        "metricKey",
+        "profileVersionId",
+        "startedAt",
+        "peakValue"
+      ],
+      "properties": {
+        "excursionId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "spaceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "metricKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "profileVersionId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "peakValue": {
+          "type": "number"
+        }
+      }
+    },
+    "complianceStreakBroken": {
+      "type": "object",
+      "required": [
+        "spaceId",
+        "profileId",
+        "brokenOn",
+        "previousDays"
+      ],
+      "properties": {
+        "spaceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "profileId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "brokenOn": {
+          "type": "string",
+          "format": "date"
+        },
+        "brokenMetric": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "previousDays": {
+          "type": "integer",
+          "minimum": 0
         }
       }
     }

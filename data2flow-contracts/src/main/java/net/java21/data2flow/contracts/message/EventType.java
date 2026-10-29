@@ -37,6 +37,9 @@ import net.java21.data2flow.contracts.message.event.ReprocessJobFinished;
 import net.java21.data2flow.contracts.message.event.ClockSkewSuspected;
 import net.java21.data2flow.contracts.message.event.CommandStatusChanged;
 import net.java21.data2flow.contracts.message.event.ComplianceApplicationChanged;
+import net.java21.data2flow.contracts.message.event.ComplianceExcursionChanged;
+import net.java21.data2flow.contracts.message.event.ComplianceScoreUpdated;
+import net.java21.data2flow.contracts.message.event.ComplianceStreakBroken;
 import net.java21.data2flow.contracts.message.event.ConnectorCatalogReported;
 import net.java21.data2flow.contracts.message.event.DeviceChanged;
 import net.java21.data2flow.contracts.message.event.DeviceCommandAck;
@@ -192,7 +195,11 @@ public enum EventType {
     AI_QUOTA_EXCEEDED("ai.quota.exceeded", "EVT-AIA-03", AiQuotaExceeded.class),
 
     // M7 환경 기준(CMP)
-    COMPLIANCE_APPLICATION_CHANGED("compliance.application.changed", "EVT-CMP-01", ComplianceApplicationChanged.class);
+    COMPLIANCE_APPLICATION_CHANGED("compliance.application.changed", "EVT-CMP-01", ComplianceApplicationChanged.class),
+    COMPLIANCE_SCORE_UPDATED("compliance.score.updated", "EVT-CMP-02", ComplianceScoreUpdated.class),
+    COMPLIANCE_EXCURSION_STARTED("compliance.excursion.started", "EVT-CMP-04", ComplianceExcursionChanged.class),
+    COMPLIANCE_EXCURSION_ENDED("compliance.excursion.ended", "EVT-CMP-04", ComplianceExcursionChanged.class),
+    COMPLIANCE_STREAK_BROKEN("compliance.streak.broken", "EVT-CMP-05", ComplianceStreakBroken.class);
 
     /** EVT-RUL-02 라우팅 키 접두사 */
     public static final String ALARM_PREFIX = "alarm.";
