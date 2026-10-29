@@ -149,7 +149,8 @@
     "compliance.report.published": "complianceReportPublished",
     "compliance.excursion.started": "complianceExcursionChanged",
     "compliance.excursion.ended": "complianceExcursionChanged",
-    "compliance.streak.broken": "complianceStreakBroken"
+    "compliance.streak.broken": "complianceStreakBroken",
+    "energy.config.changed": "energyConfigChanged"
   },
   "allOf": [
     {
@@ -2162,6 +2163,25 @@
         "properties": {
           "payload": {
             "$ref": "#/$defs/complianceReportPublished"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "energy.config.changed"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/energyConfigChanged"
           }
         }
       }
@@ -5206,6 +5226,32 @@
               }
             }
           }
+        }
+      }
+    },
+    "energyConfigChanged": {
+      "type": "object",
+      "required": [
+        "scope"
+      ],
+      "properties": {
+        "scope": {
+          "type": "string",
+          "enum": [
+            "TARIFF",
+            "EMISSION",
+            "SOURCE",
+            "VIRTUAL_SENSOR",
+            "FDD_RULE",
+            "DETECTION"
+          ]
+        },
+        "spaceId": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
         }
       }
     }

@@ -13,6 +13,7 @@ import net.java21.data2flow.contracts.message.event.AlarmSignal;
 import net.java21.data2flow.contracts.message.event.AlarmStateChanged;
 import net.java21.data2flow.contracts.message.event.NotificationDeliveryResult;
 import net.java21.data2flow.contracts.message.event.EmergencyStopChanged;
+import net.java21.data2flow.contracts.message.event.EnergyConfigChanged;
 import net.java21.data2flow.contracts.message.event.CommandNoEffect;
 import net.java21.data2flow.contracts.message.event.DriverCircuitChanged;
 import net.java21.data2flow.contracts.message.event.OscillationBlocked;
@@ -201,7 +202,10 @@ public enum EventType {
     COMPLIANCE_REPORT_PUBLISHED("compliance.report.published", "EVT-CMP-03", ComplianceReportPublished.class),
     COMPLIANCE_EXCURSION_STARTED("compliance.excursion.started", "EVT-CMP-04", ComplianceExcursionChanged.class),
     COMPLIANCE_EXCURSION_ENDED("compliance.excursion.ended", "EVT-CMP-04", ComplianceExcursionChanged.class),
-    COMPLIANCE_STREAK_BROKEN("compliance.streak.broken", "EVT-CMP-05", ComplianceStreakBroken.class);
+    COMPLIANCE_STREAK_BROKEN("compliance.streak.broken", "EVT-CMP-05", ComplianceStreakBroken.class),
+
+    // M7 에너지(ENE)
+    ENERGY_CONFIG_CHANGED("energy.config.changed", "EVT-ENE-07", EnergyConfigChanged.class);
 
     /** EVT-RUL-02 라우팅 키 접두사 */
     public static final String ALARM_PREFIX = "alarm.";
