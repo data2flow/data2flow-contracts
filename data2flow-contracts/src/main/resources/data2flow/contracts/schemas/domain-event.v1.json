@@ -146,6 +146,7 @@
     "ai.quota.exceeded": "aiQuotaExceeded",
     "compliance.application.changed": "complianceApplicationChanged",
     "compliance.score.updated": "complianceScoreUpdated",
+    "compliance.report.published": "complianceReportPublished",
     "compliance.excursion.started": "complianceExcursionChanged",
     "compliance.excursion.ended": "complianceExcursionChanged",
     "compliance.streak.broken": "complianceStreakBroken"
@@ -2142,6 +2143,25 @@
         "properties": {
           "payload": {
             "$ref": "#/$defs/complianceStreakBroken"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "compliance.report.published"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/complianceReportPublished"
           }
         }
       }
@@ -5120,6 +5140,72 @@
         "previousDays": {
           "type": "integer",
           "minimum": 0
+        }
+      }
+    },
+    "complianceReportPublished": {
+      "type": "object",
+      "required": [
+        "reportId",
+        "revisionNo",
+        "type",
+        "title",
+        "periodFrom",
+        "periodTo",
+        "sha256"
+      ],
+      "properties": {
+        "reportId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "revisionNo": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "KR_SELF_CHECK",
+            "RESET_SUPPORT",
+            "WELL_A08_SUPPORT"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "periodFrom": {
+          "type": "string",
+          "format": "date"
+        },
+        "periodTo": {
+          "type": "string",
+          "format": "date"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "recipients": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "userIds": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "emails": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
         }
       }
     }

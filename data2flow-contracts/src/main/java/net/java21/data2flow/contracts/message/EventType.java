@@ -38,6 +38,7 @@ import net.java21.data2flow.contracts.message.event.ClockSkewSuspected;
 import net.java21.data2flow.contracts.message.event.CommandStatusChanged;
 import net.java21.data2flow.contracts.message.event.ComplianceApplicationChanged;
 import net.java21.data2flow.contracts.message.event.ComplianceExcursionChanged;
+import net.java21.data2flow.contracts.message.event.ComplianceReportPublished;
 import net.java21.data2flow.contracts.message.event.ComplianceScoreUpdated;
 import net.java21.data2flow.contracts.message.event.ComplianceStreakBroken;
 import net.java21.data2flow.contracts.message.event.ConnectorCatalogReported;
@@ -197,6 +198,7 @@ public enum EventType {
     // M7 환경 기준(CMP)
     COMPLIANCE_APPLICATION_CHANGED("compliance.application.changed", "EVT-CMP-01", ComplianceApplicationChanged.class),
     COMPLIANCE_SCORE_UPDATED("compliance.score.updated", "EVT-CMP-02", ComplianceScoreUpdated.class),
+    COMPLIANCE_REPORT_PUBLISHED("compliance.report.published", "EVT-CMP-03", ComplianceReportPublished.class),
     COMPLIANCE_EXCURSION_STARTED("compliance.excursion.started", "EVT-CMP-04", ComplianceExcursionChanged.class),
     COMPLIANCE_EXCURSION_ENDED("compliance.excursion.ended", "EVT-CMP-04", ComplianceExcursionChanged.class),
     COMPLIANCE_STREAK_BROKEN("compliance.streak.broken", "EVT-CMP-05", ComplianceStreakBroken.class);
