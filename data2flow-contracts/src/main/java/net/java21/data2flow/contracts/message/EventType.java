@@ -14,6 +14,7 @@ import net.java21.data2flow.contracts.message.event.AlarmStateChanged;
 import net.java21.data2flow.contracts.message.event.NotificationDeliveryResult;
 import net.java21.data2flow.contracts.message.event.EmergencyStopChanged;
 import net.java21.data2flow.contracts.message.event.EnergyConfigChanged;
+import net.java21.data2flow.contracts.message.event.EnergyDailyUpdated;
 import net.java21.data2flow.contracts.message.event.CommandNoEffect;
 import net.java21.data2flow.contracts.message.event.DriverCircuitChanged;
 import net.java21.data2flow.contracts.message.event.OscillationBlocked;
@@ -205,6 +206,7 @@ public enum EventType {
     COMPLIANCE_STREAK_BROKEN("compliance.streak.broken", "EVT-CMP-05", ComplianceStreakBroken.class),
 
     // M7 에너지(ENE)
+    ENERGY_DAILY_UPDATED("energy.daily.updated", "EVT-ENE-01", EnergyDailyUpdated.class),
     ENERGY_CONFIG_CHANGED("energy.config.changed", "EVT-ENE-07", EnergyConfigChanged.class);
 
     /** EVT-RUL-02 라우팅 키 접두사 */
