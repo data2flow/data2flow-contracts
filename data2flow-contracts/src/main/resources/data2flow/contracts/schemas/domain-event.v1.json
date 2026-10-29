@@ -151,6 +151,7 @@
     "compliance.excursion.ended": "complianceExcursionChanged",
     "compliance.streak.broken": "complianceStreakBroken",
     "energy.daily.updated": "energyDailyUpdated",
+    "energy.baseline.trained": "energyBaselineTrained",
     "energy.config.changed": "energyConfigChanged"
   },
   "allOf": [
@@ -2164,6 +2165,25 @@
         "properties": {
           "payload": {
             "$ref": "#/$defs/complianceReportPublished"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "energy.baseline.trained"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/energyBaselineTrained"
           }
         }
       }
@@ -5246,6 +5266,75 @@
               }
             }
           }
+        }
+      }
+    },
+    "energyBaselineTrained": {
+      "type": "object",
+      "required": [
+        "versionId",
+        "status"
+      ],
+      "properties": {
+        "versionId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "enum": [
+            "READY",
+            "FAILED"
+          ]
+        },
+        "r2": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "coefficients": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "residualsRef": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        },
+        "warning": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "error": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        },
+        "neededDays": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "trainedDays": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
         }
       }
     },
