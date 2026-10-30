@@ -152,6 +152,7 @@
     "compliance.streak.broken": "complianceStreakBroken",
     "energy.daily.updated": "energyDailyUpdated",
     "energy.baseline.trained": "energyBaselineTrained",
+    "energy.virtual-sensor.updated": "energyVirtualSensorUpdated",
     "energy.config.changed": "energyConfigChanged"
   },
   "allOf": [
@@ -2165,6 +2166,25 @@
         "properties": {
           "payload": {
             "$ref": "#/$defs/complianceReportPublished"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "energy.virtual-sensor.updated"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "#/$defs/energyVirtualSensorUpdated"
           }
         }
       }
@@ -5265,6 +5285,67 @@
                 "type": "string"
               }
             }
+          }
+        }
+      }
+    },
+    "energyVirtualSensorUpdated": {
+      "type": "object",
+      "required": [
+        "spaceId",
+        "kind",
+        "metricKeys",
+        "status"
+      ],
+      "properties": {
+        "spaceId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "kind": {
+          "enum": [
+            "ACH",
+            "OCCUPANCY",
+            "THERMAL_COMFORT"
+          ]
+        },
+        "metricKeys": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "maxLength": 64
+          }
+        },
+        "computedFrom": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "computedTo": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "OK",
+            "INPUT_MISSING"
+          ]
+        },
+        "missing": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "maxLength": 64
           }
         }
       }
